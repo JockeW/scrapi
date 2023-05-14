@@ -1,8 +1,8 @@
-use scraper::{Html, Selector};
-use clap::{Arg, Command, ArgMatches};
+use clap::{Arg, ArgMatches, Command};
+use scraper::{Html, Selector, element_ref::Text};
 use std::fs::OpenOptions;
 
-pub fn get_send_command() -> Command {
+fn send_command() -> Command {
     Command::new("scrape")
         .arg(
             Arg::new("url")
@@ -21,14 +21,42 @@ pub fn get_send_command() -> Command {
                 .required(true),
         )
         .arg(
-            Arg::new("keys")//headers?
+            Arg::new("keys") //headers?
                 .short('k')
                 .long("keys")
                 .help("qweqwe")
                 .num_args(1..)
                 .required(false),
         )
-        //.get_matches_from(itr)
+    //.get_matches_from(itr)
+}
+
+//Inspect source html and possibility to searh and filter...
+fn inspect_command() -> Command {
+    Command::new("inspect")
+        .arg(
+            Arg::new("url")
+                .short('u')
+                .long("url")
+                .value_name("url")
+                .help("URL to page to inspect source on")
+                .required(true),
+        )
+        .arg(
+            Arg::new("search")
+                .short('s')
+                .long("search")
+                .help("Search term")
+                .required(false),
+        )
+        .arg(
+            Arg::new("filter")
+                .short('f')
+                .long("filter")
+                .help("Filter source on these values")
+                .num_args(1..)
+                .required(false),
+        )
 }
 
 fn main() {
@@ -42,7 +70,8 @@ fn main() {
                 .long("test")
                 .value_name("test"),
         )
-        .subcommand(get_send_command())
+        .subcommand(send_command())
+        .subcommand(inspect_command())
         .subcommand(
             Command::new("saved").arg(
                 Arg::new("list")
@@ -67,27 +96,63 @@ fn main() {
     }
 }
 
+struct Content {
+    key: Option<String>,
+    value: String,
+}
+
 fn scrape(args: &ArgMatches) {
     println!("SCRAPE SUB COMMAND");
     let url: String = args.get_one::<String>("url").unwrap().to_string();
-    //selectors (String)
-    let mut selectors = args
+    let html = reqwest::blocking::get(url).unwrap().text().unwrap();
+    let document = Html::parse_document(&html);
+
+    let selectors = args
         .get_many::<String>("selectors")
         .unwrap()
         .map(|s| s.as_str());
 
-    let test = selectors.next().unwrap();
+    let keys: Vec<&str> = args
+        .get_many::<String>("keys")
+        .unwrap()
+        .map(|s| s.as_str())
+        .collect();
 
-    //
+    let mut contents: Vec<String> = Vec::new();
 
-    let html = reqwest::blocking::get(url).unwrap().text().unwrap();
-    let document = Html::parse_document(&html);
-    let selector = Selector::parse("h3.news-list__headline").unwrap();
-    //let select = document.select(&selector);
-    let content = document.select(&selector).map(|x| x.inner_html());
-    //println!("Select: {:?}", test);
-    for element in content {
-        println!("Content: {}", element);
+    for s in selectors {
+        println!("SELECTOR: {}", s);
+        let selector = Selector::parse(s).unwrap();
+        //let element_ref =  document.select(&selector).collect();
+        let content_vec: String = document
+            .select(&selector)
+            .flat_map(|x| x.text())
+            .collect();
+
+        contents.push(content_vec);
+    }
+
+    let mut all_content: Vec<Vec<(&str, &str)>> = Vec::new();
+
+    for content_index in 0..contents.first().expect("NO CONTENT").len() {
+        let mut chunk: Vec<(&str, &str)> = Vec::new();
+        for (i, content) in contents.iter().enumerate() {
+            let header = keys[i];
+            let value = content;
+            chunk.push((header, value));
+        }
+
+        all_content.push(chunk);
+    }
+
+    for chunk in all_content {
+        //Print list or table. Just list for now
+        for data in chunk {
+            let header = data.0;
+            let value = data.1;
+            println!("{}: {}", header, value);
+        }
+        println!();
     }
 }
 
@@ -105,7 +170,7 @@ fn scrape(args: &ArgMatches) {
 //         println!("{}", response);
 //     }
 
-//     let save = args.get_one::<bool>("save"); 
+//     let save = args.get_one::<bool>("save");
 //     if let Some(s) = save {
 //         let shoud_save = *s;
 //         if shoud_save {//TODO: Also only save if the request was successful
