@@ -1,15 +1,13 @@
 [package]
-name = "http-cli"
+name = "rscrape"
 version = "0.1.0"
 edition = "2021"
+authors = ["Joakim Wilhelmsson"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 clap = "4.2.7"
-html5ever = "0.26.0"
-html_parser = "0.6.3"
+colored = "2.0.0"
 reqwest = { version = "0.11.17", features = ["blocking", "json"] }
 scraper = "0.16.0"
-serde = "1.0.162"
-serde_json = "1.0.96"

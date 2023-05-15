@@ -1,5 +1,6 @@
 use clap::{Arg, ArgMatches, Command};
-use scraper::{Html, Selector, element_ref::Text};
+use colored::Colorize;
+use scraper::{element_ref::Text, Html, Selector, Node};
 use std::fs::OpenOptions;
 
 fn send_command() -> Command {
@@ -26,7 +27,7 @@ fn send_command() -> Command {
                 .long("keys")
                 .help("qweqwe")
                 .num_args(1..)
-                .required(false),
+                .required(true),
         )
     //.get_matches_from(itr)
 }
@@ -103,9 +104,6 @@ struct Content {
 
 fn scrape(args: &ArgMatches) {
     println!("SCRAPE SUB COMMAND");
-    let url: String = args.get_one::<String>("url").unwrap().to_string();
-    let html = reqwest::blocking::get(url).unwrap().text().unwrap();
-    let document = Html::parse_document(&html);
 
     let selectors = args
         .get_many::<String>("selectors")
@@ -118,19 +116,46 @@ fn scrape(args: &ArgMatches) {
         .map(|s| s.as_str())
         .collect();
 
-    let mut contents: Vec<String> = Vec::new();
+    if keys.len() != selectors.len() {
+        println!("{}: Keys needs to be as many as selectors", "error".bold().color("red"));
+        return;
+    }
+
+    let url: String = args.get_one::<String>("url").unwrap().to_string();
+    let html = reqwest::blocking::get(url).unwrap().text().unwrap();
+    let document = Html::parse_document(&html);
+
+    let mut contents: Vec<Vec<String>> = Vec::new();
 
     for s in selectors {
         println!("SELECTOR: {}", s);
         let selector = Selector::parse(s).unwrap();
-        //let element_ref =  document.select(&selector).collect();
-        let content_vec: String = document
-            .select(&selector)
-            .flat_map(|x| x.text())
-            .collect();
+        let element_ref: Vec<_> = document.select(&selector).collect();
+
+        let mut content_vec: Vec<String> = Vec::new();
+
+        for element in element_ref {
+            let outer_text: Vec<&str> = element
+                .children()
+                .filter_map(|node| match node.value() {
+                    Node::Text(text) => Some(&text[..]),
+                    _ => None,
+                })
+                .collect();
+
+            //println!("{:?}", outer_text);
+            //TODO: Maybe add to get text of child nodes as well. (element.children())
+
+            let element_text: String = outer_text
+                .join("");
+
+            content_vec.push(element_text);
+        }
 
         contents.push(content_vec);
     }
+
+    println!("SELECTORS CONTENT: {:?}", contents);
 
     let mut all_content: Vec<Vec<(&str, &str)>> = Vec::new();
 
@@ -138,46 +163,26 @@ fn scrape(args: &ArgMatches) {
         let mut chunk: Vec<(&str, &str)> = Vec::new();
         for (i, content) in contents.iter().enumerate() {
             let header = keys[i];
-            let value = content;
+            let value = content[content_index].trim();
             chunk.push((header, value));
         }
 
         all_content.push(chunk);
     }
 
+    println!("CONTENT WITH KEYS: {:?}", all_content);
+
+    println!();
     for chunk in all_content {
-        //Print list or table. Just list for now
+        //TODO: Print list or table. Just list for now
         for data in chunk {
             let header = data.0;
             let value = data.1;
-            println!("{}: {}", header, value);
+            println!("{}: {}", header.bold(), value);
         }
         println!();
     }
 }
-
-// fn send_command(args: &ArgMatches) {
-//     println!("SEND SUB COMMAND");
-//     let url: String = args.get_one::<String>("url").unwrap().to_string();
-//     let load = args.get_one::<String>("load");
-//     if let Some(load) = load {
-//         let load_str: &str = load;
-//         //TODO: Load saved request and execute that
-//     } else {
-//         let response = reqwest::blocking::get(url).unwrap().text().unwrap();
-//         let links = Dom::parse(&response).unwrap().to_json_pretty().unwrap();
-//         //let test = serde_json::to_string_pretty(&response).unwrap();
-//         println!("{}", response);
-//     }
-
-//     let save = args.get_one::<bool>("save");
-//     if let Some(s) = save {
-//         let shoud_save = *s;
-//         if shoud_save {//TODO: Also only save if the request was successful
-//             println!("SAVE THE REQUEST. TODO: ADD ARGS FOR SAVING, LIKE NAME");
-//         }
-//     }
-// }
 
 fn save_command(name: &str, method: &str, url: &str) {
     // let mut file = OpenOptions::new()
