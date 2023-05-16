@@ -18,8 +18,12 @@ pub enum RScrapeCommand {
 
 #[derive(Debug, Args)]
 pub struct ScrapeCommand {
+    #[arg(short, long, required = true)]
     pub url: String,
+    #[arg(short, long, num_args(1..), required = true)]
     pub selectors: Vec<String>,
+    #[arg(short, long, num_args(1..), required = true)]
     pub keys: Vec<String>,
+    #[arg(short, long)]
     pub title: Option<String>
 }

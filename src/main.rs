@@ -71,6 +71,11 @@ fn inspect_command() -> Command {
 
 fn main() {
     let args = RScrapeArgs::parse();
+    
+    match args.subCommand {
+        args::RScrapeCommand::Scrape(cmd) => scrape_new(cmd.url, cmd.selectors, cmd.keys, cmd.title),
+        _ => {}
+    }
 
     // let matches = Command::new("HTTP CLI")
     //     .version("1.0")
@@ -111,6 +116,10 @@ struct ScrapedContent {
 struct Content {
     key: Option<String>,
     value: String,
+}
+
+fn scrape_new(url: String, selectors: Vec<String>, keys: Vec<String>, title: Option<String>) {
+    
 }
 
 fn scrape(args: &ArgMatches) {
