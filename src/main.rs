@@ -1,23 +1,26 @@
-use clap::{Arg, ArgMatches, Command};
-use colored::Colorize;
-use scraper::{element_ref::Text, Html, Node, Selector};
-use std::fs::OpenOptions;
+mod args;
 
-fn send_command() -> Command {
+use clap::{Arg, ArgMatches, Command, Parser};
+use colored::Colorize;
+use scraper::{element_ref::Text, Html, Node, Selector, ElementRef};
+use std::fs::OpenOptions;
+use args::RScrapeArgs;
+
+fn scrape_command() -> Command {
     Command::new("scrape")
         .arg(
             Arg::new("url")
                 .short('u')
                 .long("url")
                 .value_name("url")
-                .help("URL to send the request to")
+                .help("URL to page to scrape")
                 .required(true),
         )
         .arg(
             Arg::new("selectors")
                 .short('s')
                 .long("selectors")
-                .help("fghfgh")
+                .help("Selectors to scrape in (CSS selectors)")
                 .num_args(1..)
                 .required(true),
         )
@@ -25,18 +28,17 @@ fn send_command() -> Command {
             Arg::new("keys") //headers?
                 .short('k')
                 .long("keys")
-                .help("qweqwe")
+                .help("Keys used for selectors content")
                 .num_args(1..)
                 .required(true),
         )
         .arg(
-            Arg::new("title") //headers?
+            Arg::new("title")
                 .short('t')
                 .long("title")
-                .help("qweqwe")
+                .help("The title for whole scrape")
                 .required(false),
         )
-    //.get_matches_from(itr)
 }
 
 //Inspect source html and possibility to searh and filter...
@@ -68,40 +70,42 @@ fn inspect_command() -> Command {
 }
 
 fn main() {
-    let matches = Command::new("HTTP CLI")
-        .version("1.0")
-        .author("Joakim Wilhelmsson")
-        .about("A command-line HTTP client")
-        .arg(
-            Arg::new("test")
-                .help("Testing argument")
-                .long("test")
-                .value_name("test"),
-        )
-        .subcommand(send_command())
-        .subcommand(inspect_command())
-        .subcommand(
-            Command::new("saved").arg(
-                Arg::new("list")
-                    .short('l')
-                    .long("list")
-                    .help("List saved requests")
-                    .required(false),
-            ),
-        )
-        .get_matches();
+    let args = RScrapeArgs::parse();
 
-    match matches.subcommand() {
-        Some(("scrape", cmd)) => scrape(cmd),
-        // Some(("push",   sub_c)) => {}, // push was used
-        // Some(("commit", sub_c)) => {}, // commit was used
-        _ => {} // Either no subcommand or one not tested for...
-    };
+    // let matches = Command::new("HTTP CLI")
+    //     .version("1.0")
+    //     .author("Joakim Wilhelmsson")
+    //     .about("A command-line HTTP client")
+    //     .arg(
+    //         Arg::new("test")
+    //             .help("Testing argument")
+    //             .long("test")
+    //             .value_name("test"),
+    //     )
+    //     .subcommand(scrape_command())
+    //     .subcommand(inspect_command())
+    //     .subcommand(
+    //         Command::new("saved").arg(
+    //             Arg::new("list")
+    //                 .short('l')
+    //                 .long("list")
+    //                 .help("List saved requests")
+    //                 .required(false),
+    //         ),
+    //     )
+    //     .get_matches();
 
-    //let say_hello: Option<&str> = matches.get_one::<String>("arg").map(|s| s.as_str());
-    if let Some(msg) = matches.get_one::<String>("test").map(|s| s.as_str()) {
-        println!("Hello {msg}");
-    }
+    // match matches.subcommand() {
+    //     Some(("scrape", cmd)) => scrape(cmd),
+    //     // Some(("push",   sub_c)) => {}, // push was used
+    //     // Some(("commit", sub_c)) => {}, // commit was used
+    //     _ => {} // Either no subcommand or one not tested for...
+    // };
+}
+
+struct ScrapedContent {
+    content: Vec<Content>,
+    title: String
 }
 
 struct Content {
@@ -139,8 +143,8 @@ fn scrape(args: &ArgMatches) {
 
     for s in selectors {
         println!("SELECTOR: {}", s);
-        let selector = Selector::parse(s).unwrap();
-        let element_ref: Vec<_> = document.select(&selector).collect();
+        let selector = Selector::parse(s).expect("Not a valid selector");
+        let element_ref: Vec<ElementRef> = document.select(&selector).collect();
 
         let mut content_vec: Vec<String> = Vec::new();
 
@@ -183,15 +187,13 @@ fn scrape(args: &ArgMatches) {
 
     println!();
 
-    let title: Option<&str> = args
-        .get_one("title")
+    let title = args.get_one("title")
         .map(|t: &String| t.as_str());
 
     if let Some(title) = title {
         println!("{}", title.bold());
+        println!();
     }
-
-    println!();
 
     for chunk in all_content {
         //TODO: Print list or table. Just list for now

@@ -7,7 +7,7 @@ authors = ["Joakim Wilhelmsson"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clap = "4.2.7"
+clap = { version = "4.2.7", features = ["derive"] }
 colored = "2.0.0"
 reqwest = { version = "0.11.17", features = ["blocking", "json"] }
 scraper = "0.16.0"
