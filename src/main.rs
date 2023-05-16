@@ -1,6 +1,6 @@
 use clap::{Arg, ArgMatches, Command};
 use colored::Colorize;
-use scraper::{element_ref::Text, Html, Selector, Node};
+use scraper::{element_ref::Text, Html, Node, Selector};
 use std::fs::OpenOptions;
 
 fn send_command() -> Command {
@@ -28,6 +28,13 @@ fn send_command() -> Command {
                 .help("qweqwe")
                 .num_args(1..)
                 .required(true),
+        )
+        .arg(
+            Arg::new("title") //headers?
+                .short('t')
+                .long("title")
+                .help("qweqwe")
+                .required(false),
         )
     //.get_matches_from(itr)
 }
@@ -117,7 +124,10 @@ fn scrape(args: &ArgMatches) {
         .collect();
 
     if keys.len() != selectors.len() {
-        println!("{}: Keys needs to be as many as selectors", "error".bold().color("red"));
+        println!(
+            "{}: Keys needs to be as many as selectors",
+            "error".bold().color("red")
+        );
         return;
     }
 
@@ -146,8 +156,7 @@ fn scrape(args: &ArgMatches) {
             //println!("{:?}", outer_text);
             //TODO: Maybe add to get text of child nodes as well. (element.children())
 
-            let element_text: String = outer_text
-                .join("");
+            let element_text: String = outer_text.join("");
 
             content_vec.push(element_text);
         }
@@ -173,6 +182,17 @@ fn scrape(args: &ArgMatches) {
     println!("CONTENT WITH KEYS: {:?}", all_content);
 
     println!();
+
+    let title: Option<&str> = args
+        .get_one("title")
+        .map(|t: &String| t.as_str());
+
+    if let Some(title) = title {
+        println!("{}", title.bold());
+    }
+
+    println!();
+
     for chunk in all_content {
         //TODO: Print list or table. Just list for now
         for data in chunk {
