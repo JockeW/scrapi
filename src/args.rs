@@ -5,7 +5,7 @@ use clap::{Args, Subcommand, Parser};
 #[clap(author, version, about)]
 pub struct RScrapeArgs {
     #[clap(subcommand)]
-    pub subCommand: RScrapeCommand
+    pub sub_command: RScrapeCommand
 }
 
 #[derive(Debug, Subcommand)]
@@ -14,6 +14,8 @@ pub enum RScrapeCommand {
     Scrape(ScrapeCommand),
     // Inspect saved scrapes
     //Inspect(InspectCommand)
+    //Run saved scrape
+    //Run
 }
 
 #[derive(Debug, Args)]
@@ -25,5 +27,7 @@ pub struct ScrapeCommand {
     #[arg(short, long, num_args(1..), required = true)]
     pub keys: Vec<String>,
     #[arg(short, long)]
-    pub title: Option<String>
+    pub title: Option<String>,
+    #[arg(long)]
+    pub save: Option<String>
 }

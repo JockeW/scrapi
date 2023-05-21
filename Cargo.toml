@@ -9,5 +9,6 @@ authors = ["Joakim Wilhelmsson"]
 [dependencies]
 clap = { version = "4.2.7", features = ["derive"] }
 colored = "2.0.0"
+inquire = "0.6.2"
 reqwest = { version = "0.11.17", features = ["blocking", "json"] }
 scraper = "0.16.0"
