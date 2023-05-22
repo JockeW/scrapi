@@ -1,6 +1,6 @@
 mod args;
 
-use args::RScrapeArgs;
+use args::{Presentation, RScrapeArgs};
 use clap::{Arg, ArgMatches, Command, Parser};
 use colored::Colorize;
 use inquire::Confirm;
@@ -12,9 +12,14 @@ fn main() {
     let args = RScrapeArgs::parse();
 
     match args.sub_command {
-        args::RScrapeCommand::Scrape(cmd) => {
-            scrape(cmd.url, cmd.selectors, cmd.keys, cmd.title, cmd.save)
-        }
+        args::RScrapeCommand::Scrape(cmd) => scrape(
+            cmd.url,
+            cmd.selectors,
+            cmd.keys,
+            cmd.title,
+            cmd.save,
+            cmd.present,
+        ),
         _ => {}
     }
 }
@@ -25,6 +30,7 @@ fn scrape(
     keys: Vec<String>,
     title: Option<String>,
     save: Option<String>,
+    present: Option<Presentation>,
 ) {
     if keys.len() != selectors.len() {
         println!(
@@ -88,14 +94,31 @@ fn scrape(
         println!();
     }
 
-    for chunk in all_content {
-        //TODO: Print list or table. Just list for now
-        for data in chunk {
-            let header = data.0;
-            let value = data.1;
-            println!("{}: {}", header.bold(), value);
+    match present {
+        Some(Presentation::List) => {
+            for chunk in all_content {
+                for data in chunk {
+                    let header = data.0;
+                    let value = data.1;
+                    println!("{}: {}", header.bold(), value);
+                }
+                println!();
+            }
         }
-        println!();
+        Some(Presentation::Table) => {
+            //TODO: Print table
+        }
+        None => {
+            //Printing list as default. TODO: Maybe prompt and ask for list or table in this case instead.
+            for chunk in all_content {
+                for data in chunk {
+                    let header = data.0;
+                    let value = data.1;
+                    println!("{}: {}", header.bold(), value);
+                }
+                println!();
+            }
+        }
     }
 
     if let Some(save) = save {
@@ -116,13 +139,7 @@ fn scrape(
     }
 }
 
-fn save_scrape(
-    name: &str,
-    url: String,
-    selectors: Vec<String>,
-    keys: Vec<String>,
-    title: String,
-) {
+fn save_scrape(name: &str, url: String, selectors: Vec<String>, keys: Vec<String>, title: String) {
     let mut file = OpenOptions::new()
         .create(true)
         .append(true)
@@ -131,6 +148,10 @@ fn save_scrape(
 
     //TODO: Maybe store scrape as JSON. Could possibly be easier to combine scrapers later, and read scrapers from the file etc. See scrapers.json file
 
-
-    writeln!(file, "{} {} {:?} {:?} {}", name, url, selectors, keys, title).unwrap();
+    writeln!(
+        file,
+        "{} {} {:?} {:?} {}",
+        name, url, selectors, keys, title
+    )
+    .unwrap();
 }
