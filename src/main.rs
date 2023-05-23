@@ -73,6 +73,8 @@ fn scrape(
         contents.push(content_vec);
     }
 
+    println!("Contents vec: {:?}", contents);
+
     let mut all_content: Vec<Vec<(&str, &str)>> = Vec::new();
 
     for content_index in 0..contents.first().expect("NO CONTENT").len() {
