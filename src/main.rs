@@ -2,6 +2,7 @@ mod args;
 
 use args::{Presentation, RScrapeArgs};
 use clap::{Arg, ArgMatches, Command, Parser};
+use cli_table::{format::Justify, print_stdout, Cell, Style, Table};
 use colored::Colorize;
 use inquire::Confirm;
 use scraper::{element_ref::Text, ElementRef, Html, Node, Selector};
@@ -107,6 +108,21 @@ fn scrape(
         }
         Some(Presentation::Table) => {
             //TODO: Print table
+            let table = vec![
+                vec!["Tom".cell(), 10.cell().justify(Justify::Right)],
+                vec!["Jerry".cell(), 15.cell().justify(Justify::Right)],
+                vec!["Scooby Doo".cell(), 20.cell().justify(Justify::Right)],
+            ]
+            .table()
+            .title(vec![
+                "Name".cell().bold(true),
+                "Age (in years)".cell().bold(true),
+            ])
+            .bold(true);
+
+            let table_display = table.display().unwrap();
+
+            println!("{}", table_display);
         }
         None => {
             //Printing list as default. TODO: Maybe prompt and ask for list or table in this case instead.
