@@ -99,36 +99,14 @@ fn scrape(
 
     match present {
         Some(Presentation::List) => {
-            for chunk in all_content {
-                for data in chunk {
-                    //let header = data.0;
-                    let value = data;
-                    //println!("{}: {}", header.bold(), value);
-                }
-                println!();
-            }
+            print_content_list(all_content, keys.iter().map(|k| k.as_str()).collect());
         }
         Some(Presentation::Table) => {
-            //TODO: Print table
-            let table = all_content
-            .table()
-            .title(keys.iter().map(|k| k.cell().bold(true)))
-            .bold(true);
-
-            let table_display = table.display().unwrap();
-
-            println!("{}", table_display);
+            print_content_table(all_content, keys.iter().map(|k| k.as_str()).collect());
         }
         None => {
             //Printing list as default. TODO: Maybe prompt and ask for list or table in this case instead.
-            for chunk in all_content {
-                for data in chunk {
-                    //let header = data.0;
-                    let value = data;
-                    //println!("{}: {}", header.bold(), value);
-                }
-                println!();
-            }
+            print_content_list(all_content, keys.iter().map(|k| k.as_str()).collect());
         }
     }
 
@@ -148,6 +126,28 @@ fn scrape(
             }
         }
     }
+}
+
+fn print_content_list(content: Vec<Vec<&str>>, keys: Vec<&str>) {
+    for chunk in content {
+        for (i, data) in chunk.iter().enumerate() {
+            let header = keys[i];
+            let value = data;
+            println!("{}: {}", header.bold(), value);
+        }
+        println!();
+    }
+}
+
+fn print_content_table(content: Vec<Vec<&str>>, keys: Vec<&str>) {
+    let table = content
+        .table()
+        .title(keys.iter().map(|k| k.cell().bold(true)))
+        .bold(true);
+
+    let table_display = table.display().unwrap();
+
+    println!("{}", table_display);
 }
 
 fn save_scrape(name: &str, url: String, selectors: Vec<String>, keys: Vec<String>, title: String) {
