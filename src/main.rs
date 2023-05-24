@@ -75,14 +75,14 @@ fn scrape(
 
     println!("Contents vec: {:?}", contents);
 
-    let mut all_content: Vec<Vec<(&str, &str)>> = Vec::new();
+    let mut all_content: Vec<Vec<&str>> = Vec::new();
 
     for content_index in 0..contents.first().expect("NO CONTENT").len() {
-        let mut chunk: Vec<(&str, &str)> = Vec::new();
+        let mut chunk: Vec<&str> = Vec::new();
         for (i, content) in contents.iter().enumerate() {
             let header = keys[i].as_str();
             let value = content[content_index].trim();
-            chunk.push((header, value));
+            chunk.push(value);
         }
 
         all_content.push(chunk);
@@ -101,25 +101,18 @@ fn scrape(
         Some(Presentation::List) => {
             for chunk in all_content {
                 for data in chunk {
-                    let header = data.0;
-                    let value = data.1;
-                    println!("{}: {}", header.bold(), value);
+                    //let header = data.0;
+                    let value = data;
+                    //println!("{}: {}", header.bold(), value);
                 }
                 println!();
             }
         }
         Some(Presentation::Table) => {
             //TODO: Print table
-            let table = vec![
-                vec!["Tom".cell(), 10.cell().justify(Justify::Right)],
-                vec!["Jerry".cell(), 15.cell().justify(Justify::Right)],
-                vec!["Scooby Doo".cell(), 20.cell().justify(Justify::Right)],
-            ]
+            let table = all_content
             .table()
-            .title(vec![
-                "Name".cell().bold(true),
-                "Age (in years)".cell().bold(true),
-            ])
+            .title(keys.iter().map(|k| k.cell().bold(true)))
             .bold(true);
 
             let table_display = table.display().unwrap();
@@ -130,9 +123,9 @@ fn scrape(
             //Printing list as default. TODO: Maybe prompt and ask for list or table in this case instead.
             for chunk in all_content {
                 for data in chunk {
-                    let header = data.0;
-                    let value = data.1;
-                    println!("{}: {}", header.bold(), value);
+                    //let header = data.0;
+                    let value = data;
+                    //println!("{}: {}", header.bold(), value);
                 }
                 println!();
             }
