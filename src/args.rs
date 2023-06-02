@@ -14,7 +14,7 @@ pub enum RScrapeCommand {
     // Inspect saved scrapes
     //Inspect(InspectCommand)
     //Run saved scrape
-    //Run
+    //Run(RunCommand)
 }
 
 #[derive(clap::ValueEnum, Clone, Debug)]

@@ -4,8 +4,8 @@ use args::{Presentation, RScrapeArgs};
 use clap::{Arg, ArgMatches, Command, Parser};
 use cli_table::{format::Justify, print_stdout, Cell, Style, Table};
 use colored::Colorize;
-use inquire::Confirm;
-use scraper::{element_ref::Text, ElementRef, Html, Node, Selector};
+use inquire::{Confirm, Text};
+use scraper::{ElementRef, Html, Node, Selector};
 use std::fs::OpenOptions;
 use std::io::Write;
 
@@ -41,12 +41,12 @@ fn scrape(
         return;
     }
 
-    let html = reqwest::blocking::get(url).unwrap().text().unwrap();
+    let html = reqwest::blocking::get(&url).unwrap().text().unwrap();
     let document = Html::parse_document(&html);
 
     let mut contents: Vec<Vec<String>> = Vec::new();
 
-    for s in selectors {
+    for s in &selectors {
         println!("SELECTOR: {}", s);
         let selector = Selector::parse(&s).expect("Not a valid selector");
         let element_ref: Vec<ElementRef> = document.select(&selector).collect();
@@ -92,7 +92,7 @@ fn scrape(
 
     println!();
 
-    if let Some(title) = title {
+    if let Some(title) = &title {
         println!("{}", title.bold());
         println!();
     }
@@ -120,7 +120,7 @@ fn scrape(
                 .prompt();
 
             match answer {
-                Ok(true) => println!("Scrape is saved!"),
+                Ok(true) => save_scrape(&save, &url, selectors, keys, title, present),
                 Ok(false) => println!("Skipped saving"),
                 Err(_) => println!("Error with questionnaire, try again later"),
             }
@@ -150,7 +150,14 @@ fn print_content_table(content: Vec<Vec<&str>>, keys: Vec<&str>) {
     println!("{}", table_display);
 }
 
-fn save_scrape(name: &str, url: String, selectors: Vec<String>, keys: Vec<String>, title: String) {
+fn save_scrape(
+    name: &str,
+    url: &str,
+    selectors: Vec<String>,
+    keys: Vec<String>,
+    title: Option<String>,
+    present: Option<Presentation>,
+) {
     let mut file = OpenOptions::new()
         .create(true)
         .append(true)
@@ -161,8 +168,8 @@ fn save_scrape(name: &str, url: String, selectors: Vec<String>, keys: Vec<String
 
     writeln!(
         file,
-        "{} {} {:?} {:?} {}",
-        name, url, selectors, keys, title
+        "{} |{} |{:?} |{:?} |{:?} |{:?}",
+        name, url, selectors, keys, title, present
     )
     .unwrap();
 }
