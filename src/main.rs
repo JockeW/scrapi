@@ -7,7 +7,7 @@ use colored::Colorize;
 use inquire::{Confirm, Text};
 use scraper::{ElementRef, Html, Node, Selector};
 use std::fs::OpenOptions;
-use std::io::Write;
+use std::io::{Write, Read, BufReader, BufRead};
 
 fn main() {
     let args = RScrapeArgs::parse();
@@ -73,22 +73,17 @@ fn scrape(
         contents.push(content_vec);
     }
 
-    println!("Contents vec: {:?}", contents);
-
     let mut all_content: Vec<Vec<&str>> = Vec::new();
 
     for content_index in 0..contents.first().expect("NO CONTENT").len() {
         let mut chunk: Vec<&str> = Vec::new();
-        for (i, content) in contents.iter().enumerate() {
-            let header = keys[i].as_str();
+        for content in contents.iter() {
             let value = content[content_index].trim();
             chunk.push(value);
         }
 
         all_content.push(chunk);
     }
-
-    println!("CONTENT WITH KEYS: {:?}", all_content);
 
     println!();
 
@@ -163,6 +158,16 @@ fn save_scrape(
         .append(true)
         .open("scrapers.txt")
         .unwrap();
+
+    let buff_reader = BufReader::new(file);
+
+    //TODO: Check that the name is unique
+    let lines: Vec<String> = buff_reader.lines().filter_map(|l| l.ok()).collect();
+    let saved_scrape_names: Vec<&str> = lines.iter().map(|l| l.split('|').collect::<Vec<&str>>()[0].to_lowercase()).collect();
+
+    if saved_scrape_names.contains(&name.to_lowercase()) {
+
+    }
 
     //TODO: Maybe store scrape as JSON. Could possibly be easier to combine scrapers later, and read scrapers from the file etc. See scrapers.json file
 
