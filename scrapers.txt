@@ -1,1 +1,1 @@
-News scrape |https://dn.se |[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"] |["Headline", "Time"] |None |None
+News scrape|https://dn.se|[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"]|["Headline", "Time"]|None|None
