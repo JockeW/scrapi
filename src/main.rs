@@ -157,6 +157,7 @@ fn save_scrape(
     let mut file = OpenOptions::new()
         .create(true)
         .append(true)
+        .read(true)
         .open("scrapers.txt")
         .unwrap();
 
@@ -170,7 +171,7 @@ fn save_scrape(
     for line in buff_reader.lines() {
         match line {
             Ok(l) => lines.push(l),
-            Err(_) => println!("ERROR")
+            Err(e) => println!("ERROR: {}", e)
         }
     }
     println!("LINES: {:?}", lines);
