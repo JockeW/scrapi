@@ -1,1 +1,3 @@
 News scrape|https://dn.se|[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"]|["Headline", "Time"]|None|None
+weather today|https://www.yr.no/nb/v%C3%A6rvarsel/timetabell/2-2664996/Sverige/Halland%20County/Varbergs%20Kommun/Varberg?i=0|[".fluid-table__scroll-container tbody time", ".fluid-table__scroll-container tbody .temperature.temperature--warm"]|["Time", "Temperature"]|None|Some(Table)
+weather today 2|https://www.yr.no/nb/v%C3%A6rvarsel/timetabell/2-2664996/Sverige/Halland%20County/Varbergs%20Kommun/Varberg?i=0|[".fluid-table__scroll-container tbody time", ".fluid-table__scroll-container tbody .temperature.temperature--warm"]|["Time", "Temperature"]|None|Some(Table)

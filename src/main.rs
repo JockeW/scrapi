@@ -14,24 +14,26 @@ fn main() {
 
     match args.sub_command {
         args::RScrapeCommand::Scrape(cmd) => scrape(
+            cmd.to_string(),
             cmd.url,
             cmd.selectors,
             cmd.keys,
             cmd.title,
             cmd.save,
-            cmd.present,
+            cmd.present
         ),
         _ => {}
     }
 }
 
 fn scrape(
+    input: String,
     url: String,
     selectors: Vec<String>,
     keys: Vec<String>,
     title: Option<String>,
     save: Option<String>,
-    present: Option<Presentation>,
+    present: Option<Presentation>
 ) {
     if keys.len() != selectors.len() {
         println!(
@@ -153,7 +155,7 @@ fn save_scrape(
     title: Option<String>,
     present: Option<Presentation>,
 ) {
-    println!("SAVING SCRAPE");
+    println!("Saving scrape...");
     let mut file = OpenOptions::new()
         .create(true)
         .append(true)
@@ -161,17 +163,13 @@ fn save_scrape(
         .open("scrapers.txt")
         .unwrap();
 
-    println!("TEST 1");
+    let buff_reader = BufReader::new(&file);
 
-    let buff_reader = BufReader::new(file);
-    println!("TEST 2");
-
-    //TODO: Check that the name is unique
     let mut lines: Vec<String> = Vec::new();
     for line in buff_reader.lines() {
         match line {
             Ok(l) => lines.push(l),
-            Err(e) => println!("ERROR: {}", e)
+            Err(e) => println!("ERROR: {}", e),
         }
     }
     println!("LINES: {:?}", lines);
@@ -184,14 +182,19 @@ fn save_scrape(
 
     println!("SCRAPE NAMES: {:?}", scrape_names);
 
-    if scrape_names.contains(&name.to_lowercase().as_str()) {}
+    if scrape_names.contains(&name.to_lowercase().as_str()) {
+        println!("There is already a scrape with that name")
+        //TODO: Prompt user with options for entering a new name or cancel
+    } else {
+        writeln!(
+            file,
+            "{}|{}|{:?}|{:?}|{:?}|{:?}",
+            name, url, selectors, keys, title, present
+        )
+        .unwrap();
+    }
 
     //TODO: Maybe store scrape as JSON. Could possibly be easier to combine scrapers later, and read scrapers from the file etc. See scrapers.json file
 
-    // writeln!(
-    //     file,
-    //     "{}|{}|{:?}|{:?}|{:?}|{:?}",
-    //     name, url, selectors, keys, title, present
-    // )
-    // .unwrap();
+    //TODO: Store full command (input) as one field
 }
