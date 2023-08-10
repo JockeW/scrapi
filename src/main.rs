@@ -43,13 +43,14 @@ fn scrape(
         return;
     }
 
+    //println!("Full command: {}", input);
+
     let html = reqwest::blocking::get(&url).unwrap().text().unwrap();
     let document = Html::parse_document(&html);
 
     let mut contents: Vec<Vec<String>> = Vec::new();
 
     for s in &selectors {
-        println!("SELECTOR: {}", s);
         let selector = Selector::parse(&s).expect("Not a valid selector");
         let element_ref: Vec<ElementRef> = document.select(&selector).collect();
 
@@ -117,7 +118,7 @@ fn scrape(
                 .prompt();
 
             match answer {
-                Ok(true) => save_scrape(&save, &url, selectors, keys, title, present),
+                Ok(true) => save_scrape(&save, &input, &url, selectors, keys, title, present),
                 Ok(false) => println!("Skipped saving"),
                 Err(_) => println!("Error with questionnaire, try again later"),
             }
@@ -149,6 +150,7 @@ fn print_content_table(content: Vec<Vec<&str>>, keys: Vec<&str>) {
 
 fn save_scrape(
     name: &str,
+    full_command: &str,
     url: &str,
     selectors: Vec<String>,
     keys: Vec<String>,
@@ -160,7 +162,7 @@ fn save_scrape(
         .create(true)
         .append(true)
         .read(true)
-        .open("scrapers.txt")
+        .open("scrapes.json")
         .unwrap();
 
     let buff_reader = BufReader::new(&file);
@@ -188,8 +190,8 @@ fn save_scrape(
     } else {
         writeln!(
             file,
-            "{}|{}|{:?}|{:?}|{:?}|{:?}",
-            name, url, selectors, keys, title, present
+            "{}|{}|{}|{:?}|{:?}|{:?}|{:?}",
+            name, full_command, url, selectors, keys, title, present
         )
         .unwrap();
     }

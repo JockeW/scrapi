@@ -1,0 +1,1 @@
+save NAME|scrape --url=https://dn.se --selectors=[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"] --keys=["Headline", "Time"] --title="NEW title" --save"save NAME" --present=table|https://dn.se|[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"]|["Headline", "Time"]|Some("NEW title")|Some(Table)

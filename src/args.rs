@@ -1,4 +1,5 @@
 use clap::{Args, Parser, Subcommand};
+use serde::{Serialize, Deserialize};
 use std::fmt;
 
 #[derive(Debug, Parser)]
@@ -22,7 +23,7 @@ pub enum RScrapeCommand {
     // Delete(DeleteCommand)
 }
 
-#[derive(clap::ValueEnum, Clone, Debug, PartialEq, Eq)]
+#[derive(clap::ValueEnum, Clone, Debug, PartialEq, Eq, Serialize)]
 pub enum Presentation {
     List,
     Table,
@@ -37,7 +38,7 @@ impl fmt::Display for Presentation {
     }
 }
 
-#[derive(Debug, Args)]
+#[derive(Debug, Args, Serialize)]
 pub struct ScrapeCommand {
     #[arg(short, long, required = true)]
     pub url: String,
@@ -55,25 +56,27 @@ pub struct ScrapeCommand {
 
 impl fmt::Display for ScrapeCommand {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        //TODO: Fix selectors and keys. Should not be printed as array.
+
         let title;
         match &self.title {
-            Some(t) => title = t.as_str(),
-            None => title = "",
+            Some(t) => title = format!(" --title=\"{}\"",t.as_str()),
+            None => title = "".to_string(),
         }
 
         let save;
         match &self.save {
-            Some(s) => save = s.as_str(),
-            None => save = "",
+            Some(s) => save = format!(" --save\"{}\"",s.as_str()),
+            None => save = "".to_string(),
         }
 
         let present;
         match &self.present {
             Some(p) => {
                 if *p == Presentation::List {
-                    present = "list";
+                    present = " --present=list";
                 } else {
-                    present = "table";
+                    present = " --present=table";
                 }
             },
             None => present = "",
@@ -81,7 +84,7 @@ impl fmt::Display for ScrapeCommand {
 
         write!(
             f,
-            "--url={} --selectors={:?} --keys={:?} {} {} {}",
+            "scrape --url={} --selectors={:?} --keys={:?}{}{}{}",
             self.url, self.selectors, self.keys, title, save, present
         )
     }
