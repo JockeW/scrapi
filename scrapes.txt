@@ -1,1 +1,4 @@
-save NAME|scrape --url=https://dn.se --selectors=[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"] --keys=["Headline", "Time"] --title="NEW title" --save"save NAME" --present=table|https://dn.se|[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"]|["Headline", "Time"]|Some("NEW title")|Some(Table)
+news;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"];["Headline", "Time"];Some("Test Title here");Some(Table)
+news again;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"];["Headline", "Time"];Some("Test Title here");Some(Table)
+newsa;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"];["Headline", "Time"];Test Title here;Table
+news without title;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"];["Headline", "Time"];;Table
