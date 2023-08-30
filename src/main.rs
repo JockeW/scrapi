@@ -1,7 +1,7 @@
 mod args;
 
 use args::{Presentation, RScrapeArgs};
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 use cli_table::{Cell, Style, Table};
 use colored::Colorize;
 use inquire::Confirm;
@@ -73,7 +73,26 @@ fn scrape_saved_scrape(data_str: &str) {
 
     println!("KEYS: {:?}", keys);
 
-    scrape(url.to_string(), selectors, keys, None, None, None);
+    let title: Option<String> = if data[4].len() > 0 {
+        Some(data[4].to_string())
+    } else {
+        None
+    };
+
+    let presentation = if data[5].to_lowercase() == "table" {
+        Some(Presentation::Table)
+    } else {
+        Some(Presentation::List)
+    };
+
+    scrape(
+        url.to_string(),
+        selectors,
+        keys,
+        title,
+        None,
+        presentation,
+    );
 }
 
 fn check(name: String) {

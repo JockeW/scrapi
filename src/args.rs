@@ -1,5 +1,6 @@
 use clap::{Args, Parser, Subcommand};
 use std::fmt;
+use std::str::FromStr;
 
 #[derive(Debug, Parser)]
 #[clap(author, version, about)]
@@ -21,12 +22,9 @@ pub enum RScrapeCommand {
 
     // Scrape and inspect. Args for url, search and filter
     // Inspect(InspectCommand)
-
     /// Run saved scrape
-    Run(RunCommand)
-
-    // Delete saved scrape
-    // Delete(DeleteCommand)
+    Run(RunCommand), // Delete saved scrape
+                     // Delete(DeleteCommand)
 }
 
 #[derive(clap::ValueEnum, Clone, Debug, PartialEq, Eq)]
@@ -40,6 +38,19 @@ impl fmt::Display for Presentation {
         match self {
             Presentation::List => write!(f, "List"),
             Presentation::Table => write!(f, "Table"),
+        }
+    }
+}
+
+impl FromStr for Presentation {
+    type Err = ();
+
+    fn from_str(input: &str) -> Result<Presentation, Self::Err> {
+        println!("Parsing this");
+        match input {
+            "List" => Ok(Presentation::List),
+            "Table" => Ok(Presentation::Table),
+            _ => Err(()),
         }
     }
 }
