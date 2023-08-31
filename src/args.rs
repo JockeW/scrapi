@@ -76,7 +76,7 @@ pub struct ScrapeCommand {
 
 #[derive(Debug, Args)]
 pub struct CheckCommand {
-    #[arg(short, long, required = true)]
+    #[arg(required = true)]
     pub name: String,
 }
 
