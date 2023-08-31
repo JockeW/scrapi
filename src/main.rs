@@ -44,14 +44,12 @@ fn run(name: String) {
     let scrape_data = get_saved_scrape(&name);
 
     match scrape_data {
-        Some(data) => scrape_saved_scrape(data),
+        Some(data) => run_saved_scrape(data),
         None => println!("Scrape {} not found!", &name),
     }
-
-    // scrape(url, selectors, keys, title, save, present)
 }
 
-fn scrape_saved_scrape(data_str: &str) {
+fn run_saved_scrape(data_str: &str) {
     let data: Vec<&str> = data_str.split(";").collect();
 
     let url = data[1];
@@ -62,16 +60,12 @@ fn scrape_saved_scrape(data_str: &str) {
         .map(|&s| s.trim().replace("\"", "").to_string())
         .collect::<Vec<String>>();
 
-    println!("SELECTORS: {:?}", selectors);
-
     let keys = data[3][1..data[3].len() - 1]
         .split(", ")
         .collect::<Vec<&str>>()
         .iter()
         .map(|&s| s.trim().replace("\"", "").to_string())
         .collect::<Vec<String>>();
-
-    println!("KEYS: {:?}", keys);
 
     let title: Option<String> = if data[4].len() > 0 {
         Some(data[4].to_string())
@@ -85,14 +79,7 @@ fn scrape_saved_scrape(data_str: &str) {
         Some(Presentation::List)
     };
 
-    scrape(
-        url.to_string(),
-        selectors,
-        keys,
-        title,
-        None,
-        presentation,
-    );
+    scrape(url.to_string(), selectors, keys, title, None, presentation);
 }
 
 fn check(name: String) {
@@ -115,7 +102,21 @@ fn print_scrape_info(data_str: &str) {
     println!("Title: {}", data[4]);
     println!("Present: {}", data[5]);
 
-    println!("Full command: TODO!"); //TODO: Implement a print of the full command
+    let selectors: String = data[2].replace("[", "").replace("]", "").replace(",", "");
+    let keys: String = data[3].replace("[", "").replace("]", "").replace(",", "");
+    let title: String = if data[4].len() > 0 {
+        format!(" --title \"{}\"", data[4])
+    } else {
+        "".to_string()
+    };
+
+    println!(
+        "Full command: {}",
+        format!(
+            "scrape --url {} --selectors {} --keys {}{} --present {}",
+            data[1], selectors, keys, title, data[5]
+        )
+    );
 }
 
 fn scrape(
@@ -288,7 +289,12 @@ fn save_scrape(
         writeln!(
             file,
             "{};{};{:?};{:?};{};{}",
-            name, url, selectors, keys, title_to_write, present
+            name,
+            url,
+            selectors,
+            keys,
+            title_to_write,
+            present.to_string().to_lowercase()
         )
         .unwrap();
     }

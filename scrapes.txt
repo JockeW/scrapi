@@ -1,4 +1,5 @@
 news;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"];["Headline", "Time"];Some("Test Title here");Some(Table)
 news again;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"];["Headline", "Time"];Some("Test Title here");Some(Table)
-newsa;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"];["Headline", "Time"];Test Title here;Table
-news without title;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"];["Head", "Time"];;Table
+newsa;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"];["Headline", "Time"];Test Title here;table
+news without title;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"];["Head", "Time"];;table
+news2;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"];["Headline", "Time"];My perfect title;table
