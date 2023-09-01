@@ -32,7 +32,12 @@ fn get_saved_scrape(name: &str) -> Option<&'static str> {
     let file_content = include_str!("../scrapes.txt");
 
     for line in file_content.trim().split('\n') {
-        let scrape_name = line.split(';').collect::<Vec<&str>>()[0];
+        let scrape_name = if line.split(';').collect::<Vec<&str>>()[0] == "combined" {
+            line.split(';').collect::<Vec<&str>>()[1]
+        } else {
+            line.split(';').collect::<Vec<&str>>()[0]
+        };
+
         if scrape_name == name {
             return Some(line);
         }
@@ -64,11 +69,13 @@ fn combine(name: String, scrapes: Vec<String>) {
     let scrape_names: Vec<&str> = saved_scrapes
         .iter()
         .map(|s| s.split(';').collect::<Vec<&str>>()[0])
-        .collect();
+        .collect(); //TODO: Change scrape_names to contain names of combined scrapes instead of just "combined"
 
     if scrape_names.contains(&name.to_lowercase().as_str()) {
         println!("There is already a scrape with that name: '{}'", name);
         //TODO: Prompt user with options for entering a new name or cancel
+    } else if name.to_lowercase() == "combined" {
+        println!("'combined' is a reserved word");
     } else {
         let mut all_scrapes_exists = true;
         for scrape in &scrapes {
@@ -88,16 +95,28 @@ fn run(name: String) {
     let scrape_data = get_saved_scrape(&name);
 
     match scrape_data {
-        Some(data) => run_saved_scrape(data),
+        Some(data_str) => {
+            let data: Vec<&str> = data_str.split(";").collect();
+
+            match data[0] {
+                "combined" => {
+                    let scrapes = data[2][1..data[2].len() - 1]
+                        .split(", ")
+                        .collect::<Vec<&str>>()
+                        .iter()
+                        .map(|&s| s.trim().replace("\"", "").to_string())
+                        .collect::<Vec<String>>();
+
+                    run_combined_scrapes(scrapes);
+                }
+                _ => run_scrape(data),
+            }
+        }
         None => println!("Scrape {} not found!", &name),
     }
 }
 
-fn run_saved_scrape(data_str: &str) {
-    let data: Vec<&str> = data_str.split(";").collect();
-
-    //TODO: Check if combined or not. Below code now only handles normal scrapes (NOT combined)
-
+fn run_scrape(data: Vec<&str>) {
     let url = data[1];
     let selectors = data[2][1..data[2].len() - 1]
         .split(", ")
@@ -128,6 +147,30 @@ fn run_saved_scrape(data_str: &str) {
     scrape(url.to_string(), selectors, keys, title, None, presentation);
 }
 
+fn run_combined_scrapes(scrapes: Vec<String>) {
+    let mut saved_scrapes: Vec<Vec<&str>> = Vec::new();
+
+    for scrape in &scrapes {
+        let saved_scrape = get_saved_scrape(scrape);
+
+        match saved_scrape {
+            Some(data_str) => {
+                let data: Vec<&str> = data_str.split(";").collect();
+                saved_scrapes.push(data);
+            }
+            None => {
+                println!("Scrape was not found: '{}'", scrape);
+            }
+        }
+    }
+
+    if saved_scrapes.len() == scrapes.len() {
+        for scrape in saved_scrapes {
+            run_scrape(scrape);
+        }
+    }
+}
+
 fn check(name: String) {
     let scrape_data = get_saved_scrape(&name);
 
@@ -139,6 +182,8 @@ fn check(name: String) {
 
 fn print_scrape_info(data_str: &str) {
     let data: Vec<&str> = data_str.split(";").collect();
+
+    //TODO: Handle print for combined scrape
 
     println!("Name: {}", data[0]);
     println!("Url: {}", data[1]);
@@ -319,13 +364,15 @@ fn save_scrape(
     let scrape_names: Vec<&str> = saved_scrapes
         .iter()
         .map(|s| s.split(';').collect::<Vec<&str>>()[0])
-        .collect();
+        .collect(); //TODO: Change scrape_names to contain names of combined scrapes instead of just "combined"
 
     println!("SCRAPE NAMES: {:?}", scrape_names);
 
     if scrape_names.contains(&name.to_lowercase().as_str()) {
         println!("There is already a scrape with that name: '{}'", name);
         //TODO: Prompt user with options for entering a new name or cancel
+    } else if name.to_lowercase() == "combined" {
+        println!("'combined' is a reserved word");
     } else {
         let title_to_write = match title {
             Some(t) => t,
