@@ -3,3 +3,4 @@ news again;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-
 newsa;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"];["Headline", "Time"];Test Title here;table
 news without title;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"];["Head", "Time"];;table
 news2;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"];["Headline", "Time"];My perfect title;table
+combined;my combined scrape;["news without title", "news2"]

@@ -1,7 +1,7 @@
 mod args;
 
 use args::{Presentation, RScrapeArgs};
-use clap::{Parser, ValueEnum};
+use clap::Parser;
 use cli_table::{Cell, Style, Table};
 use colored::Colorize;
 use inquire::Confirm;
@@ -23,6 +23,7 @@ fn main() {
         ),
         args::RScrapeCommand::Check(cmd) => check(cmd.name),
         args::RScrapeCommand::Run(cmd) => run(cmd.name),
+        args::RScrapeCommand::Combine(cmd) => combine(cmd.name, cmd.scrapes),
         _ => {}
     }
 }
@@ -40,6 +41,49 @@ fn get_saved_scrape(name: &str) -> Option<&'static str> {
     None
 }
 
+fn combine(name: String, scrapes: Vec<String>) {
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .read(true)
+        .open("scrapes.txt")
+        .unwrap();
+
+    let buff_reader = BufReader::new(&file);
+
+    let mut lines: Vec<String> = Vec::new();
+    for line in buff_reader.lines() {
+        match line {
+            Ok(l) => lines.push(l),
+            Err(e) => println!("ERROR: {}", e),
+        }
+    }
+
+    let saved_scrapes: Vec<&str> = lines.iter().map(|l| l.as_str()).collect();
+
+    let scrape_names: Vec<&str> = saved_scrapes
+        .iter()
+        .map(|s| s.split(';').collect::<Vec<&str>>()[0])
+        .collect();
+
+    if scrape_names.contains(&name.to_lowercase().as_str()) {
+        println!("There is already a scrape with that name: '{}'", name);
+        //TODO: Prompt user with options for entering a new name or cancel
+    } else {
+        let mut all_scrapes_exists = true;
+        for scrape in &scrapes {
+            if !scrape_names.contains(&scrape.as_str()) {
+                println!("There is no saved scrape: '{}'", scrape);
+                all_scrapes_exists = false;
+            }
+        }
+
+        if all_scrapes_exists {
+            writeln!(file, "combined;{};{:?}", name, scrapes).unwrap();
+        }
+    }
+}
+
 fn run(name: String) {
     let scrape_data = get_saved_scrape(&name);
 
@@ -51,6 +95,8 @@ fn run(name: String) {
 
 fn run_saved_scrape(data_str: &str) {
     let data: Vec<&str> = data_str.split(";").collect();
+
+    //TODO: Check if combined or not. Below code now only handles normal scrapes (NOT combined)
 
     let url = data[1];
     let selectors = data[2][1..data[2].len() - 1]
@@ -278,7 +324,7 @@ fn save_scrape(
     println!("SCRAPE NAMES: {:?}", scrape_names);
 
     if scrape_names.contains(&name.to_lowercase().as_str()) {
-        println!("There is already a scrape with that name")
+        println!("There is already a scrape with that name: '{}'", name);
         //TODO: Prompt user with options for entering a new name or cancel
     } else {
         let title_to_write = match title {

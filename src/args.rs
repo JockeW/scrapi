@@ -19,6 +19,8 @@ pub enum RScrapeCommand {
 
     // List all saved scrapes
     // List(ListCommand)
+    /// Combine saved scrapes
+    Combine(CombineCommand),
 
     // Update saved scrape. Same args as Scrape command except save arg.
     // Update(UpdateCommand)
@@ -26,8 +28,9 @@ pub enum RScrapeCommand {
     // Scrape and inspect. Args for url, search and filter
     // Inspect(InspectCommand)
     /// Run saved scrape
-    Run(RunCommand), // Delete saved scrape
-                     // Delete(DeleteCommand)
+    Run(RunCommand),
+    // Delete saved scrape. OBS!! HANDLE SAVED COMBINED SCRAPES THAT MIGHT BE USING THIS SCRAPE
+    // Delete(DeleteCommand)
 }
 
 #[derive(clap::ValueEnum, Clone, Debug, PartialEq, Eq)]
@@ -56,6 +59,14 @@ impl FromStr for Presentation {
             _ => Err(()),
         }
     }
+}
+
+#[derive(Debug, Args)]
+pub struct CombineCommand {
+    #[arg(short, long, required = true)]
+    pub name: String,
+    #[arg(short, long, num_args(1..), required = true)]
+    pub scrapes: Vec<String>,
 }
 
 #[derive(Debug, Args)]
