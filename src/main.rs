@@ -228,33 +228,43 @@ fn scrape(
 
     let html = reqwest::blocking::get(&url).unwrap().text().unwrap();
     let document = Html::parse_document(&html);
+    //println!("{}", document.html());//TODO: Some message if response html is only a captcha
 
     let mut contents: Vec<Vec<String>> = Vec::new();
 
     for s in &selectors {
         let selector = Selector::parse(&s).expect("Not a valid selector");
         let element_ref: Vec<ElementRef> = document.select(&selector).collect();
+        //println!("Num of elements: {}", element_ref.len());
 
-        let mut content_vec: Vec<String> = Vec::new();
+        if element_ref.len() > 0 {
+            let mut content_vec: Vec<String> = Vec::new();
 
-        for element in element_ref {
-            let outer_text: Vec<&str> = element
-                .children()
-                .filter_map(|node| match node.value() {
-                    Node::Text(text) => Some(&text[..]),
-                    _ => None,
-                })
-                .collect();
+            for element in element_ref {
+                let outer_text: Vec<&str> = element
+                    .children()
+                    .filter_map(|node| match node.value() {
+                        Node::Text(text) => Some(&text[..]),
+                        _ => None,
+                    })
+                    .collect();
 
-            //println!("{:?}", outer_text);
-            //TODO: Maybe add to get text of child nodes as well. (element.children())
+                //println!("{:?}", outer_text);
+                //TODO: Maybe add to get text of child nodes as well. (element.children())
 
-            let element_text: String = outer_text.join("");
+                let element_text: String = outer_text.join("");
 
-            content_vec.push(element_text);
+                content_vec.push(element_text);
+            }
+
+            contents.push(content_vec);
+        } else {
+            println!("No elements found for selector: {}", s);
         }
+    }
 
-        contents.push(content_vec);
+    if contents.len() == 0 {
+        return;
     }
 
     let mut all_content: Vec<Vec<&str>> = Vec::new();

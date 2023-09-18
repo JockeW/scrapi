@@ -52,7 +52,6 @@ impl FromStr for Presentation {
     type Err = ();
 
     fn from_str(input: &str) -> Result<Presentation, Self::Err> {
-        println!("Parsing this");
         match input {
             "List" => Ok(Presentation::List),
             "Table" => Ok(Presentation::Table),
