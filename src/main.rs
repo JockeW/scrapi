@@ -8,6 +8,7 @@ use inquire::Confirm;
 use scraper::{ElementRef, Html, Node, Selector};
 use std::fs::OpenOptions;
 use std::io::{BufRead, BufReader, Write};
+use std::vec;
 
 fn main() {
     let args = RScrapeArgs::parse();
@@ -245,6 +246,17 @@ fn scrape(
                     .children()
                     .filter_map(|node| match node.value() {
                         Node::Text(text) => Some(&text[..]),
+                        Node::Element(el) => {
+                            let test = ElementRef::wrap(node)
+                                .iter()
+                                .flat_map(|el| el.text())
+                                .collect::<Vec<&str>>();
+
+                            return Some(&test.join(" "));
+
+                            // println!("CONTAINED ELEMENT");
+                            //None
+                        }
                         _ => None,
                     })
                     .collect();
