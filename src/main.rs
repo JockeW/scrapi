@@ -242,22 +242,36 @@ fn scrape(
             let mut content_vec: Vec<String> = Vec::new();
 
             for element in element_ref {
-                // let mut full_text = String::from("");
+                let mut full_text = String::from("");
 
-                // let mut element_stack: Vec<ElementRef> = Vec::new();
-                // element_stack.push(element);
+                let mut element_stack: Vec<ElementRef> = Vec::new();
+                element_stack.push(element);
 
-                // while element_stack.len() > 0 {
-                //     let curr_element = element_stack.pop().unwrap();
+                while element_stack.len() > 0 {
+                    let curr_element = element_stack.pop().unwrap();
 
-                //     for node in curr_element.children() {
-                //         match node.value() {
-                //             Node::Text(text) => full_text = format!("{} {}", full_text, &text[..]),
-                //             Node::Element(el) => element_stack.push(el),
-                //             _ => ()
-                //         }
-                //     }
-                // }
+                    for node in curr_element.children() {
+                        match node.value() {
+                            Node::Text(text) => full_text = format!("{} {}", full_text, &text[..]),
+                            Node::Element(_el) => {
+                                let element_ref = ElementRef::wrap(node).unwrap();
+                                let element_text = element_ref.text().collect::<Vec<&str>>();
+                                let mut text_to_append = String::new();
+                                for text in element_text {
+                                    text_to_append = format!("{} {}", text_to_append, text);
+                                }
+
+                                full_text = format!("{} {}", full_text, text_to_append);
+
+                                println!("Before");
+                                println!("Debug: {}", full_text);
+                                println!("After");
+                                //element_stack.push(element_ref);
+                            }
+                            _ => (),
+                        }
+                    }
+                }
 
                 // let outer_text: Vec<&str> = element
                 //     .children()
@@ -292,7 +306,7 @@ fn scrape(
                 //     .flat_map(|el| el.text())
                 //     .collect::<Vec<_>>();
 
-                let element_text: String = outer_text.join("");
+                let element_text: String = full_text;
 
                 content_vec.push(element_text);
             }
