@@ -242,27 +242,55 @@ fn scrape(
             let mut content_vec: Vec<String> = Vec::new();
 
             for element in element_ref {
-                let outer_text: Vec<&str> = element
-                    .children()
-                    .filter_map(|node| match node.value() {
-                        Node::Text(text) => Some(&text[..]),
-                        Node::Element(el) => {
-                            let test = ElementRef::wrap(node)
-                                .iter()
-                                .flat_map(|el| el.text())
-                                .collect::<Vec<&str>>();
+                // let mut full_text = String::from("");
 
-                            return Some(&test.join(" "));
+                // let mut element_stack: Vec<ElementRef> = Vec::new();
+                // element_stack.push(element);
 
-                            // println!("CONTAINED ELEMENT");
-                            //None
-                        }
-                        _ => None,
-                    })
-                    .collect();
+                // while element_stack.len() > 0 {
+                //     let curr_element = element_stack.pop().unwrap();
+
+                //     for node in curr_element.children() {
+                //         match node.value() {
+                //             Node::Text(text) => full_text = format!("{} {}", full_text, &text[..]),
+                //             Node::Element(el) => element_stack.push(el),
+                //             _ => ()
+                //         }
+                //     }
+                // }
+
+                // let outer_text: Vec<&str> = element
+                //     .children()
+                //     .filter_map(|node| match node.value() {
+                //         Node::Text(text) => Some(&text[..]),
+                //         Node::Element(el) => {
+                //             let test = ElementRef::wrap(node)
+                //                 .iter()
+                //                 .flat_map(|el| el.text())
+                //                 .collect::<Vec<&str>>();
+
+                //             //let asd= Some(&test.join(" ").as_str());
+
+                //             println!("New iteration");
+                //             println!("Test: {:?}", test);
+
+                //             Some(*test.first().unwrap())
+
+                //             // println!("CONTAINED ELEMENT");
+                //             //None
+                //         }
+                //         _ => None,
+                //     })
+                //     .collect();
 
                 //println!("{:?}", outer_text);
                 //TODO: Maybe add to get text of child nodes as well. (element.children())
+
+                // let outer_text = element
+                //     .children()
+                //     .filter_map(|child| ElementRef::wrap(child))
+                //     .flat_map(|el| el.text())
+                //     .collect::<Vec<_>>();
 
                 let element_text: String = outer_text.join("");
 
