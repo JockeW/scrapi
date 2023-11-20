@@ -3,4 +3,5 @@ newsa;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-list-
 news without title;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"];["Head", "Time"];;table
 news2;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"];["Headline", "Time"];My perfect title;table
 combined;my combined scrape;["news without title", "news2"]
-news;https://dn.se;[".ds-teaser-list-timeline__item-title", ".ds-teaser-list-timeline__item-notes > span"];["Headline", "Time"];;table
+concerts;https://www.livenation.se/event/allevents?genres=hard-rock-and-metal&utm_source=adp&page=1;[".result-info__localizedname", ".event-date__date"];["Band", "Date"];;table
+news;https://www.dn.se/;[".ds-teaser-list-vertical__item-title", ".ds-teaser-list-vertical__item-notes>span:nth-child(1)"];["Headline", "Time"];;table

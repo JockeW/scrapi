@@ -8,7 +8,6 @@ use inquire::Confirm;
 use scraper::{ElementRef, Html, Node, Selector};
 use std::fs::OpenOptions;
 use std::io::{BufRead, BufReader, Write};
-use std::vec;
 
 fn main() {
     let args = RScrapeArgs::parse();
@@ -25,7 +24,6 @@ fn main() {
         args::RScrapeCommand::Check(cmd) => check(cmd.name),
         args::RScrapeCommand::Run(cmd) => run(cmd.name),
         args::RScrapeCommand::Combine(cmd) => combine(cmd.name, cmd.scrapes),
-        _ => {}
     }
 }
 
@@ -236,7 +234,6 @@ fn scrape(
     for s in &selectors {
         let selector = Selector::parse(&s).expect("Not a valid selector");
         let element_ref: Vec<ElementRef> = document.select(&selector).collect();
-        //println!("Num of elements: {}", element_ref.len());
 
         if element_ref.len() > 0 {
             let mut content_vec: Vec<String> = Vec::new();
@@ -244,67 +241,25 @@ fn scrape(
             for element in element_ref {
                 let mut full_text = String::from("");
 
-                let mut element_stack: Vec<ElementRef> = Vec::new();
-                element_stack.push(element);
-
-                while element_stack.len() > 0 {
-                    let curr_element = element_stack.pop().unwrap();
-
-                    for node in curr_element.children() {
-                        match node.value() {
-                            Node::Text(text) => full_text = format!("{} {}", full_text, &text[..]),
-                            Node::Element(_el) => {
-                                let element_ref = ElementRef::wrap(node).unwrap();
-                                let element_text = element_ref.text().collect::<Vec<&str>>();
-                                let mut text_to_append = String::new();
-                                for text in element_text {
-                                    text_to_append = format!("{} {}", text_to_append, text);
-                                }
-
-                                full_text = format!("{} {}", full_text, text_to_append);
-
-                                println!("Before");
-                                println!("Debug: {}", full_text);
-                                println!("After");
-                                //element_stack.push(element_ref);
-                            }
-                            _ => (),
+                for node in element.children() {
+                    match node.value() {
+                        Node::Text(text) => {
+                            full_text = format!("{} {}", full_text, text.trim());
                         }
+                        Node::Element(_el) => {
+                            let element_ref = ElementRef::wrap(node).unwrap();
+                            let element_text = element_ref.text().collect::<Vec<&str>>();
+
+                            let mut text_to_append = String::new();
+                            for text in element_text {
+                                text_to_append = format!("{}{}", text_to_append, text);
+                            }
+
+                            full_text = format!("{}{}", full_text, text_to_append);
+                        }
+                        _ => (),
                     }
                 }
-
-                // let outer_text: Vec<&str> = element
-                //     .children()
-                //     .filter_map(|node| match node.value() {
-                //         Node::Text(text) => Some(&text[..]),
-                //         Node::Element(el) => {
-                //             let test = ElementRef::wrap(node)
-                //                 .iter()
-                //                 .flat_map(|el| el.text())
-                //                 .collect::<Vec<&str>>();
-
-                //             //let asd= Some(&test.join(" ").as_str());
-
-                //             println!("New iteration");
-                //             println!("Test: {:?}", test);
-
-                //             Some(*test.first().unwrap())
-
-                //             // println!("CONTAINED ELEMENT");
-                //             //None
-                //         }
-                //         _ => None,
-                //     })
-                //     .collect();
-
-                //println!("{:?}", outer_text);
-                //TODO: Maybe add to get text of child nodes as well. (element.children())
-
-                // let outer_text = element
-                //     .children()
-                //     .filter_map(|child| ElementRef::wrap(child))
-                //     .flat_map(|el| el.text())
-                //     .collect::<Vec<_>>();
 
                 let element_text: String = full_text;
 
