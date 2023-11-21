@@ -29,6 +29,9 @@ pub enum RScrapeCommand {
     // Inspect(InspectCommand)
     /// Run saved scrape
     Run(RunCommand),
+
+    Html(HtmlCommand),
+
     // Delete saved scrape. OBS!! HANDLE SAVED COMBINED SCRAPES THAT MIGHT BE USING THIS SCRAPE
     // Delete(DeleteCommand)
 }
@@ -94,6 +97,14 @@ pub struct CheckCommand {
 pub struct RunCommand {
     #[arg(required = true)]
     pub name: String,
+}
+
+#[derive(Debug, Args)]
+pub struct HtmlCommand {
+    #[arg(short, long, required = true)]
+    pub url: String,
+    // #[arg(required = true)]
+    // pub name: String,
 }
 
 // impl fmt::Display for ScrapeCommand {

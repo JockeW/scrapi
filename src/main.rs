@@ -6,7 +6,7 @@ use cli_table::{Cell, Style, Table};
 use colored::Colorize;
 use inquire::Confirm;
 use scraper::{ElementRef, Html, Node, Selector};
-use std::fs::OpenOptions;
+use std::fs::{OpenOptions, self};
 use std::io::{BufRead, BufReader, Write};
 
 fn main() {
@@ -24,7 +24,17 @@ fn main() {
         args::RScrapeCommand::Check(cmd) => check(cmd.name),
         args::RScrapeCommand::Run(cmd) => run(cmd.name),
         args::RScrapeCommand::Combine(cmd) => combine(cmd.name, cmd.scrapes),
+        args::RScrapeCommand::Html(cmd) => html(cmd.url)//TODO: Have as export option for Scrape and Run commands
     }
+}
+
+fn html(url: String) {
+    let html = reqwest::blocking::get(&url).unwrap().text().unwrap();
+    let document = Html::parse_document(&html);
+
+    let data = document.html();
+
+    fs::write("foo.html", data).expect("Unable to write file");
 }
 
 fn get_saved_scrape(name: &str) -> Option<&'static str> {
