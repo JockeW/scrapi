@@ -6,7 +6,7 @@ use cli_table::{Cell, Style, Table};
 use colored::Colorize;
 use inquire::Confirm;
 use scraper::{ElementRef, Html, Node, Selector};
-use std::fs::{OpenOptions, self};
+use std::fs::{self, OpenOptions};
 use std::io::{BufRead, BufReader, Write};
 
 fn main() {
@@ -24,7 +24,7 @@ fn main() {
         args::RScrapeCommand::Check(cmd) => check(cmd.name),
         args::RScrapeCommand::Run(cmd) => run(cmd.name),
         args::RScrapeCommand::Combine(cmd) => combine(cmd.name, cmd.scrapes),
-        args::RScrapeCommand::Html(cmd) => html(cmd.url)//TODO: Have as export option for Scrape and Run commands
+        args::RScrapeCommand::Html(cmd) => html(cmd.url), //TODO: Have as export option for Scrape and Run commands
     }
 }
 
@@ -192,31 +192,36 @@ fn check(name: String) {
 fn print_scrape_info(data_str: &str) {
     let data: Vec<&str> = data_str.split(";").collect();
 
-    //TODO: Handle print for combined scrape
+    
+    if data[0] == "combined" {
+        println!("COMBINED SCRAPE!");
 
-    println!("Name: {}", data[0]);
-    println!("Url: {}", data[1]);
-    println!("Selectors: {}", data[2]);
-    println!("Keys: {}", data[3]);
-
-    println!("Title: {}", data[4]);
-    println!("Present: {}", data[5]);
-
-    let selectors: String = data[2].replace("[", "").replace("]", "").replace(",", "");
-    let keys: String = data[3].replace("[", "").replace("]", "").replace(",", "");
-    let title: String = if data[4].len() > 0 {
-        format!(" --title \"{}\"", data[4])
+        //TODO: Handle print for combined scrape
     } else {
-        "".to_string()
-    };
+        println!("Name: {}", data[0]);
+        println!("Url: {}", data[1]);
+        println!("Selectors: {}", data[2]);
+        println!("Keys: {}", data[3]);
 
-    println!(
-        "Full command: {}",
-        format!(
-            "scrape --url {} --selectors {} --keys {}{} --present {}",
-            data[1], selectors, keys, title, data[5]
-        )
-    );
+        println!("Title: {}", data[4]);
+        println!("Present: {}", data[5]);
+
+        let selectors: String = data[2].replace("[", "").replace("]", "").replace(",", "");
+        let keys: String = data[3].replace("[", "").replace("]", "").replace(",", "");
+        let title: String = if data[4].len() > 0 {
+            format!(" --title \"{}\"", data[4])
+        } else {
+            "".to_string()
+        };
+
+        println!(
+            "Full command: {}",
+            format!(
+                "scrape --url {} --selectors {} --keys {}{} --present {}",
+                data[1], selectors, keys, title, data[5]
+            )
+        );
+    }
 }
 
 fn scrape(
