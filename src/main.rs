@@ -37,7 +37,7 @@ fn html(url: String) {
     fs::write("foo.html", data).expect("Unable to write file");
 }
 
-fn get_saved_scrape(name: &str) -> Option<&'static str> {
+fn get_saved_scrape(name: &str) -> Option<&str> {
     let file_content = include_str!("../scrapes.txt");
 
     for line in file_content.trim().split('\n') {
@@ -192,12 +192,28 @@ fn check(name: String) {
 fn print_scrape_info(data_str: &str) {
     let data: Vec<&str> = data_str.split(";").collect();
 
-    
     if data[0] == "combined" {
-        println!("COMBINED SCRAPE!");
+        let scrape_names: Vec<String> = data[2]
+            .replace("[", "")
+            .replace("]", "")
+            .replace(",", "")
+            .replace("\"", "")
+            .split(' ')
+            .map(|s| s.to_string())
+            .collect();
 
-        //TODO: Handle print for combined scrape
+        for name in scrape_names {
+            let scrape = get_saved_scrape(&name);
+            if let Some(scrape) = scrape {
+                print(scrape.split(";").collect());
+                println!();
+            }
+        }
     } else {
+        print(data);
+    }
+
+    fn print(data: Vec<&str>) {
         println!("Name: {}", data[0]);
         println!("Url: {}", data[1]);
         println!("Selectors: {}", data[2]);
