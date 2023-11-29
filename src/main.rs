@@ -17,6 +17,7 @@ fn main() {
             cmd.url,
             cmd.selectors,
             cmd.keys,
+            cmd.attributes,
             cmd.title,
             cmd.save,
             cmd.present,
@@ -141,19 +142,38 @@ fn run_scrape(data: Vec<&str>) {
         .map(|&s| s.trim().replace("\"", "").to_string())
         .collect::<Vec<String>>();
 
-    let title: Option<String> = if data[4].len() > 0 {
-        Some(data[4].to_string())
+    let attributes: Vec<String> = if data[4].len() > 2 {
+        data[4][1..data[4].len() - 1]
+            .split(", ")
+            .collect::<Vec<&str>>()
+            .iter()
+            .map(|&s| s.trim().replace("\"", "").to_string())
+            .collect::<Vec<String>>()
+    } else {
+        Vec::new()
+    };
+
+    let title: Option<String> = if data[5].len() > 0 {
+        Some(data[5].to_string())
     } else {
         None
     };
 
-    let presentation = if data[5].to_lowercase() == "table" {
+    let presentation = if data[6].to_lowercase() == "table" {
         Some(Presentation::Table)
     } else {
         Some(Presentation::List)
     };
 
-    scrape(url.to_string(), selectors, keys, title, None, presentation);
+    scrape(
+        url.to_string(),
+        selectors,
+        keys,
+        attributes,
+        title,
+        None,
+        presentation,
+    );
 }
 
 fn run_combined_scrapes(scrapes: Vec<String>) {
@@ -218,14 +238,22 @@ fn print_scrape_info(data_str: &str) {
         println!("Url: {}", data[1]);
         println!("Selectors: {}", data[2]);
         println!("Keys: {}", data[3]);
-
-        println!("Title: {}", data[4]);
-        println!("Present: {}", data[5]);
+        println!("Attributes: {}", data[4]);
+        println!("Title: {}", data[5]);
+        println!("Present: {}", data[6]);
 
         let selectors: String = data[2].replace("[", "").replace("]", "").replace(",", "");
         let keys: String = data[3].replace("[", "").replace("]", "").replace(",", "");
-        let title: String = if data[4].len() > 0 {
-            format!(" --title \"{}\"", data[4])
+        let title: String = if data[5].len() > 0 {
+            format!(" --title \"{}\"", data[5])
+        } else {
+            "".to_string()
+        };
+
+        let attributes_string = data[4].replace("[", "").replace("]", "").replace(",", "");
+        let attributes = if attributes_string.len() > 0 {
+            //let attributes = data[4].replace("[", "").replace("]", "").replace(",", "");
+            format!(" --attributes {}", attributes_string)
         } else {
             "".to_string()
         };
@@ -233,8 +261,8 @@ fn print_scrape_info(data_str: &str) {
         println!(
             "Full command: {}",
             format!(
-                "scrape --url {} --selectors {} --keys {}{} --present {}",
-                data[1], selectors, keys, title, data[5]
+                "scrape --url \"{}\" --selectors {} --keys {}{}{} --present {}",
+                data[1], selectors, keys, attributes, title, data[6]
             )
         );
     }
@@ -244,6 +272,7 @@ fn scrape(
     url: String,
     selectors: Vec<String>,
     keys: Vec<String>,
+    attributes: Vec<String>,
     title: Option<String>,
     save: Option<String>,
     present: Option<Presentation>,
@@ -256,13 +285,21 @@ fn scrape(
         return;
     }
 
+    if attributes.len() != 0 && attributes.len() != selectors.len() {
+        println!(
+            "{}: Attributes needs to be as many as selectors if provided",
+            "error".bold().color("red")
+        );
+        return;
+    }
+
     let html = reqwest::blocking::get(&url).unwrap().text().unwrap();
     let document = Html::parse_document(&html);
     //println!("{}", document.html());//TODO: Some message if response html is only a captcha
 
     let mut contents: Vec<Vec<String>> = Vec::new();
 
-    for s in &selectors {
+    for (index, s) in selectors.iter().enumerate() {
         let selector = Selector::parse(&s).expect("Not a valid selector");
         let element_ref: Vec<ElementRef> = document.select(&selector).collect();
 
@@ -271,6 +308,24 @@ fn scrape(
 
             for element in element_ref {
                 let mut full_text = String::from("");
+
+                // If there is an attribute specified for current selector, get the value of that attribute
+                // instead of checking element.children
+
+                if attributes.len() > 0 {
+                    let attribute = attributes[index].trim();
+
+                    if attribute.len() > 0 {
+                        let attribute_value = element
+                            .value()
+                            .attr(attribute)
+                            .expect("Attribute not found");
+
+                        full_text = attribute_value.to_string();
+                        content_vec.push(full_text);
+                        continue;
+                    }
+                }
 
                 for node in element.children() {
                     match node.value() {
@@ -291,10 +346,7 @@ fn scrape(
                         _ => (),
                     }
                 }
-
-                let element_text: String = full_text;
-
-                content_vec.push(element_text);
+                content_vec.push(full_text);
             }
 
             contents.push(content_vec);
@@ -353,7 +405,15 @@ fn scrape(
                 .prompt();
 
             match answer {
-                Ok(true) => save_scrape(&save, &url, selectors, keys, title, selected_presentation),
+                Ok(true) => save_scrape(
+                    &save,
+                    &url,
+                    selectors,
+                    keys,
+                    attributes,
+                    title,
+                    selected_presentation,
+                ),
                 Ok(false) => println!("Skipped saving"),
                 Err(_) => println!("Error with questionnaire, try again later"),
             }
@@ -388,6 +448,7 @@ fn save_scrape(
     url: &str,
     selectors: Vec<String>,
     keys: Vec<String>,
+    attributes: Vec<String>,
     title: Option<String>,
     present: Presentation,
 ) {
@@ -420,7 +481,7 @@ fn save_scrape(
 
     if scrape_names.contains(&name.to_lowercase().as_str()) {
         println!("There is already a scrape with that name: '{}'", name);
-        //TODO: Prompt user with options for entering a new name or cancel
+        //TODO: Prompt user with options for overwrite, entering a new name, or cancel
     } else if name.to_lowercase() == "combined" {
         println!("'combined' is a reserved word");
     } else {
@@ -431,11 +492,12 @@ fn save_scrape(
 
         writeln!(
             file,
-            "{};{};{:?};{:?};{};{}",
+            "{};{};{:?};{:?};{:?};{};{}",
             name,
             url,
             selectors,
             keys,
+            attributes,
             title_to_write,
             present.to_string().to_lowercase()
         )

@@ -1,8 +1,9 @@
-news again;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"];["Headline", "Time"];Some("Test Title here");Some(Table)
-newsa;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"];["Headline", "Time"];Test Title here;table
-news without title;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"];["Head", "Time"];;table
-news2;https://dn.se;[".news-list--timeline h3.news-list__headline", ".news-list--timeline .news-list__time"];["Headline", "Time"];My perfect title;table
-combined;my combined scrape;["news without title", "news2"]
-concerts;https://www.livenation.se/event/allevents?genres=hard-rock-and-metal&utm_source=adp&page=1;[".result-info__localizedname", ".event-date__date"];["Band", "Date"];;table
-news;https://www.dn.se/;[".ds-teaser-list-vertical__item-title", ".ds-teaser-list-vertical__item-notes>span:nth-child(1)"];["Headline", "Time"];;table
+news;https://www.dn.se/;[".ds-teaser-list-vertical__item-title", ".ds-teaser-list-vertical__item-notes>span:nth-child(1)", ".ds-teaser-list-vertical__content>a"];["Headline", "Time", "Link"];["", "", "href"];;table
 combined;newsconcerts;["concerts", "news"]
+concerts;https://www.livenation.se/event/allevents?genres=hard-rock-and-metal&utm_source=adp&page=1;[".result-info__localizedname", ".event-date__date"];["Band", "Date"];[];Concerts TITLE;table
+news without link;https://www.dn.se/;[".ds-teaser-list-vertical__item-title", ".ds-teaser-list-vertical__item-notes>span:nth-child(1)"];["Headline", "Time"];[];;table
+TESTING;https://www.dn.se/;[".ds-teaser-list-vertical__item-title", ".ds-teaser-list-vertical__item-notes>span:nth-child(1)", ".ds-teaser-list-vertical__content>a"];["Headline", "Time", "Link"];[];;table
+TESTING2;https://www.dn.se/;[".ds-teaser-list-vertical__item-title", ".ds-teaser-list-vertical__item-notes>span:nth-child(1)", ".ds-teaser-list-vertical__content>a"];["Headline", "Time", "Link"];[" ", " ", "href"];;table
+TESTING3;https://www.dn.se/;[".ds-teaser-list-vertical__item-title", ".ds-teaser-list-vertical__item-notes>span:nth-child(1)", ".ds-teaser-list-vertical__content>a"];["Headline", "Time", "Link"];["", "", "href"];;table
+TESTING4;https://www.dn.se/;[".ds-teaser-list-vertical__item-title", ".ds-teaser-list-vertical__item-notes>span:nth-child(1)", ".ds-teaser-list-vertical__content>a"];["Headline", "Time", "Link"];[];;table
+TESTING5;https://www.dn.se/;[".ds-teaser-list-vertical__item-title", ".ds-teaser-list-vertical__item-notes>span:nth-child(1)", ".ds-teaser-list-vertical__content>a"];["Headline", "Time", "Link"];["href"];MIN Titel!;table
