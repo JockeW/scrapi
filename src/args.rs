@@ -1,4 +1,4 @@
-use clap::{Args, Parser, Subcommand, builder, value_parser};
+use clap::{Args, Parser, Subcommand};
 use std::fmt;
 use std::str::FromStr;
 
@@ -79,7 +79,7 @@ pub struct ScrapeCommand {
     pub selectors: Vec<String>,
     #[arg(short, long, num_args(1..), required = true)]
     pub keys: Vec<String>,
-    #[arg(short, long, num_args(0..), empty_value(), required = false)]
+    #[arg(short, long, num_args(0..), required = false)]
     pub attributes: Vec<String>,
     #[arg(short, long)]
     pub title: Option<String>,
