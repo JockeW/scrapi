@@ -31,7 +31,6 @@ pub enum RScrapeCommand {
     Run(RunCommand),
 
     Html(HtmlCommand),
-
     // Delete saved scrape. OBS!! HANDLE SAVED COMBINED SCRAPES THAT MIGHT BE USING THIS SCRAPE
     // Delete(DeleteCommand)
 }
@@ -79,13 +78,13 @@ pub struct ScrapeCommand {
     pub selectors: Vec<String>,
     #[arg(short, long, num_args(1..), required = true)]
     pub keys: Vec<String>,
-    #[arg(short, long, num_args(0..), required = false)]
-    pub attributes: Vec<String>,
-    #[arg(short, long)]
+    #[arg(short, long, num_args(0..), required = false, help = "Attribute to get for specific selector. One attribute per selector. Format: <selector_index>:<attribute>")]
+    pub attributes: Option<Vec<String>>,
+    #[arg(short, long, required = false)]
     pub title: Option<String>,
-    #[arg(long)]
+    #[arg(long, required = false)]
     pub save: Option<String>,
-    #[arg(short, long)]
+    #[arg(short, long, required = false)]
     pub present: Option<Presentation>,
 }
 

@@ -142,15 +142,17 @@ fn run_scrape(data: Vec<&str>) {
         .map(|&s| s.trim().replace("\"", "").to_string())
         .collect::<Vec<String>>();
 
-    let attributes: Vec<String> = if data[4].len() > 2 {
-        data[4][1..data[4].len() - 1]
-            .split(", ")
-            .collect::<Vec<&str>>()
-            .iter()
-            .map(|&s| s.trim().replace("\"", "").to_string())
-            .collect::<Vec<String>>()
+    let attributes: Option<Vec<String>> = if data[4].len() > 2 {
+        Some(
+            data[4][1..data[4].len() - 1]
+                .split(", ")
+                .collect::<Vec<&str>>()
+                .iter()
+                .map(|&s| s.trim().replace("\"", "").to_string())
+                .collect::<Vec<String>>(),
+        )
     } else {
-        Vec::new()
+        None
     };
 
     let title: Option<String> = if data[5].len() > 0 {
@@ -159,10 +161,14 @@ fn run_scrape(data: Vec<&str>) {
         None
     };
 
-    let presentation = if data[6].to_lowercase() == "table" {
-        Some(Presentation::Table)
+    let presentation = if data[6].len() > 0 {
+        if data[6].to_lowercase() == "table" {
+            Some(Presentation::Table)
+        } else {
+            Some(Presentation::List)
+        }
     } else {
-        Some(Presentation::List)
+        None
     };
 
     scrape(
@@ -244,16 +250,22 @@ fn print_scrape_info(data_str: &str) {
 
         let selectors: String = data[2].replace("[", "").replace("]", "").replace(",", "");
         let keys: String = data[3].replace("[", "").replace("]", "").replace(",", "");
+
+        let attributes_string = data[4].replace("[", "").replace("]", "").replace(",", "");
+        let attributes = if attributes_string.len() > 0 {
+            format!(" --attributes {}", attributes_string)
+        } else {
+            "".to_string()
+        };
+
         let title: String = if data[5].len() > 0 {
             format!(" --title \"{}\"", data[5])
         } else {
             "".to_string()
         };
 
-        let attributes_string = data[4].replace("[", "").replace("]", "").replace(",", "");
-        let attributes = if attributes_string.len() > 0 {
-            //let attributes = data[4].replace("[", "").replace("]", "").replace(",", "");
-            format!(" --attributes {}", attributes_string)
+        let presentation: String = if data[6].len() > 0 {
+            format!(" --present \"{}\"", data[6])
         } else {
             "".to_string()
         };
@@ -261,8 +273,8 @@ fn print_scrape_info(data_str: &str) {
         println!(
             "Full command: {}",
             format!(
-                "scrape --url \"{}\" --selectors {} --keys {}{}{} --present {}",
-                data[1], selectors, keys, attributes, title, data[6]
+                "scrape --url \"{}\" --selectors {} --keys {}{}{}{}",
+                data[1], selectors, keys, attributes, title, presentation
             )
         );
     }
@@ -272,7 +284,7 @@ fn scrape(
     url: String,
     selectors: Vec<String>,
     keys: Vec<String>,
-    attributes: Vec<String>,
+    attributes: Option<Vec<String>>,
     title: Option<String>,
     save: Option<String>,
     present: Option<Presentation>,
@@ -285,12 +297,26 @@ fn scrape(
         return;
     }
 
-    if attributes.len() != 0 && attributes.len() != selectors.len() {
-        println!(
-            "{}: Attributes needs to be as many as selectors if provided",
-            "error".bold().color("red")
-        );
-        return;
+    let mut parsed_attributes: Vec<(usize, &str)> = Vec::new();
+
+    if let Some(attributes) = attributes.as_ref() {
+        for attr in attributes {
+            let attr_parts: Vec<&str> = attr.split(":").collect();
+            if attr_parts.len() != 2 {
+                println!("{}: Invalid attribute", "error".bold().color("red"));
+                return;
+            }
+
+            let selector_index: usize = attr_parts
+                .first()
+                .unwrap()
+                .parse()
+                .expect("Attribute argument needs correct format");
+
+            let attribute = *attr_parts.last().unwrap();
+
+            parsed_attributes.push((selector_index, attribute));
+        }
     }
 
     let html = reqwest::blocking::get(&url).unwrap().text().unwrap();
@@ -312,17 +338,28 @@ fn scrape(
                 // If there is an attribute specified for current selector, get the value of that attribute
                 // instead of checking element.children
 
-                if attributes.len() > 0 {
-                    let attribute = attributes[index].trim();
+                if parsed_attributes.len() > 0 {
+                    let attributes = parsed_attributes
+                        .iter()
+                        .filter(|&a| a.0 == index)
+                        .collect::<Vec<&(usize, &str)>>();
 
-                    if attribute.len() > 0 {
-                        let attribute_value = element
-                            .value()
-                            .attr(attribute)
-                            .expect("Attribute not found");
+                    if attributes.len() > 0 {
+                        if attributes.len() > 1 {
+                            println!("Only one attribute per selector.");
+                            return;
+                        }
 
-                        full_text = attribute_value.to_string();
-                        content_vec.push(full_text);
+                        for attribute in attributes {
+                            let attribute_value = element
+                                .value()
+                                .attr(attribute.1)
+                                .expect("Attribute not found");
+
+                            full_text = attribute_value.to_string();
+                            content_vec.push(full_text);
+                        }
+
                         continue;
                     }
                 }
@@ -378,21 +415,14 @@ fn scrape(
         println!();
     }
 
-    let mut selected_presentation = Presentation::List;
-
     match present {
         Some(Presentation::List) => {
             print_content_list(all_content, keys.iter().map(|k| k.as_str()).collect());
-            selected_presentation = Presentation::List;
         }
         Some(Presentation::Table) => {
             print_content_table(all_content, keys.iter().map(|k| k.as_str()).collect());
-            selected_presentation = Presentation::Table;
         }
-        None => {
-            //Printing list as default. TODO: Maybe prompt and ask for list or table in this case instead.
-            print_content_list(all_content, keys.iter().map(|k| k.as_str()).collect());
-        }
+        None => (),
     }
 
     if let Some(save) = save {
@@ -405,15 +435,7 @@ fn scrape(
                 .prompt();
 
             match answer {
-                Ok(true) => save_scrape(
-                    &save,
-                    &url,
-                    selectors,
-                    keys,
-                    attributes,
-                    title,
-                    selected_presentation,
-                ),
+                Ok(true) => save_scrape(&save, &url, selectors, keys, attributes, title, present),
                 Ok(false) => println!("Skipped saving"),
                 Err(_) => println!("Error with questionnaire, try again later"),
             }
@@ -448,9 +470,9 @@ fn save_scrape(
     url: &str,
     selectors: Vec<String>,
     keys: Vec<String>,
-    attributes: Vec<String>,
+    attributes: Option<Vec<String>>,
     title: Option<String>,
-    present: Presentation,
+    presentation: Option<Presentation>,
 ) {
     println!("Saving scrape...");
     let mut file = OpenOptions::new()
@@ -490,16 +512,20 @@ fn save_scrape(
             None => "".to_string(),
         };
 
+        let attributes_to_write = match attributes {
+            Some(t) => t,
+            None => Vec::new(),
+        };
+
+        let presentation_to_write = match presentation {
+            Some(p) => p.to_string().to_lowercase(),
+            None => "".to_string(),
+        };
+
         writeln!(
             file,
             "{};{};{:?};{:?};{:?};{};{}",
-            name,
-            url,
-            selectors,
-            keys,
-            attributes,
-            title_to_write,
-            present.to_string().to_lowercase()
+            name, url, selectors, keys, attributes_to_write, title_to_write, presentation_to_write
         )
         .unwrap();
     }
