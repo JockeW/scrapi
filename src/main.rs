@@ -313,6 +313,11 @@ fn scrape(
                 .parse()
                 .expect("Attribute argument needs correct format");
 
+            if parsed_attributes.iter().any(|a| a.0 == selector_index) {
+                println!("You can only have one attribute per seletor");
+                return;
+            }
+
             let attribute = *attr_parts.last().unwrap();
 
             parsed_attributes.push((selector_index, attribute));
@@ -345,20 +350,13 @@ fn scrape(
                         .collect::<Vec<&(usize, &str)>>();
 
                     if attributes.len() > 0 {
-                        if attributes.len() > 1 {
-                            println!("Only one attribute per selector.");
-                            return;
-                        }
+                        let attribute_value = element
+                            .value()
+                            .attr(attributes.first().unwrap().1)
+                            .expect("Attribute not found");
 
-                        for attribute in attributes {
-                            let attribute_value = element
-                                .value()
-                                .attr(attribute.1)
-                                .expect("Attribute not found");
-
-                            full_text = attribute_value.to_string();
-                            content_vec.push(full_text);
-                        }
+                        full_text = attribute_value.to_string();
+                        content_vec.push(full_text);
 
                         continue;
                     }
