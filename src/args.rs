@@ -78,8 +78,10 @@ pub struct ScrapeCommand {
     pub keys: Vec<String>,
     #[arg(short, long, num_args(0..), required = false, help = "Attribute to get for specific selector. One attribute per selector. Format: <selector_index>:<attribute>")]
     pub attributes: Option<Vec<String>>,
-    #[arg(long, num_args(0..), required = false, help = "Prefix to add for specific selector value. One prefix per selector. Format: <selector_index>:<prefix>")]
+    #[arg(long, num_args(0..), required = false, help = "Prefixes to add for specific selector values. One prefix per selector. Format: <selector_index>:<prefix>")]
     pub prefixes: Option<Vec<String>>,
+    #[arg(long, num_args(0..), required = false, help = "Suffixes to add for specific selector values. One suffix per selector. Format: <selector_index>:<suffix>")]
+    pub suffixes: Option<Vec<String>>,
     #[arg(short, long, required = false)]
     pub title: Option<String>,
     #[arg(long, required = false)]

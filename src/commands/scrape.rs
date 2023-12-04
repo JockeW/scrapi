@@ -16,6 +16,7 @@ pub fn scrape(
     keys: Vec<String>,
     attributes: Option<Vec<String>>,
     prefixes: Option<Vec<String>>,
+    suffixes: Option<Vec<String>>,
     title: Option<String>,
     save: Option<String>,
     present: Option<Presentation>,
@@ -74,6 +75,28 @@ pub fn scrape(
             let prefix_value = prefix_parts.1;
 
             parsed_prefixes.push((selector_index, prefix_value));
+        }
+    }
+
+    let mut parsed_suffixes: Vec<(usize, &str)> = Vec::new();
+
+    if let Some(suffixes) = suffixes.as_ref() {
+        for suffix in suffixes {
+            let suffix_parts = suffix.split_once(":").expect("Invalid suffix");
+
+            let selector_index: usize = suffix_parts
+                .0
+                .parse()
+                .expect("Suffixes argument needs correct format");
+
+            if parsed_suffixes.iter().any(|a| a.0 == selector_index) {
+                println!("You can only have one suffix per seletor");
+                return;
+            }
+
+            let suffix_value = suffix_parts.1;
+
+            parsed_suffixes.push((selector_index, suffix_value));
         }
     }
 
@@ -145,6 +168,16 @@ pub fn scrape(
                         full_text = format!("{}{}", prefixes.first().unwrap().1, full_text);
                     }
                 }
+                if parsed_suffixes.len() > 0 {
+                    let suffixes = parsed_suffixes
+                        .iter()
+                        .filter(|&a| a.0 == index)
+                        .collect::<Vec<&(usize, &str)>>();
+
+                    if suffixes.len() > 0 {
+                        full_text = format!("{}{}", full_text, suffixes.first().unwrap().1);
+                    }
+                }
 
                 content_vec.push(full_text);
             }
@@ -199,7 +232,7 @@ pub fn scrape(
 
             match answer {
                 Ok(true) => save_scrape(
-                    &save, &url, selectors, keys, attributes, prefixes, title, present,
+                    &save, &url, selectors, keys, attributes, prefixes, suffixes, title, present,
                 ),
                 Ok(false) => println!("Skipped saving"),
                 Err(_) => println!("Error with questionnaire, try again later"),
@@ -237,6 +270,7 @@ fn save_scrape(
     keys: Vec<String>,
     attributes: Option<Vec<String>>,
     prefixes: Option<Vec<String>>,
+    suffixes: Option<Vec<String>>,
     title: Option<String>,
     presentation: Option<Presentation>,
 ) {
@@ -288,6 +322,11 @@ fn save_scrape(
             None => Vec::new(),
         };
 
+        let suffixes_to_write = match suffixes {
+            Some(t) => t,
+            None => Vec::new(),
+        };
+
         let presentation_to_write = match presentation {
             Some(p) => p.to_string().to_lowercase(),
             None => "".to_string(),
@@ -295,13 +334,14 @@ fn save_scrape(
 
         writeln!(
             file,
-            "{};{};{:?};{:?};{:?};{:?};{};{}",
+            "{};{};{:?};{:?};{:?};{:?};{:?};{};{}",
             name,
             url,
             selectors,
             keys,
             attributes_to_write,
             prefixes_to_write,
+            suffixes_to_write,
             title_to_write,
             presentation_to_write
         )
