@@ -3,7 +3,7 @@ use std::{
     io::{BufRead, BufReader, Write},
 };
 
-use cli_table::{Table, Cell, Style};
+use cli_table::{Cell, Style, Table};
 use colored::Colorize;
 use inquire::Confirm;
 use scraper::{ElementRef, Html, Node, Selector};
@@ -15,6 +15,7 @@ pub fn scrape(
     selectors: Vec<String>,
     keys: Vec<String>,
     attributes: Option<Vec<String>>,
+    prefixes: Option<Vec<String>>,
     title: Option<String>,
     save: Option<String>,
     present: Option<Presentation>,
@@ -54,6 +55,28 @@ pub fn scrape(
         }
     }
 
+    let mut parsed_prefixes: Vec<(usize, &str)> = Vec::new();
+
+    if let Some(prefixes) = prefixes.as_ref() {
+        for prefix in prefixes {
+            let prefix_parts = prefix.split_once(":").expect("Invalid prefix");
+
+            let selector_index: usize = prefix_parts
+                .0
+                .parse()
+                .expect("Prefixes argument needs correct format");
+
+            if parsed_prefixes.iter().any(|a| a.0 == selector_index) {
+                println!("You can only have one prefix per seletor");
+                return;
+            }
+
+            let prefix_value = prefix_parts.1;
+
+            parsed_prefixes.push((selector_index, prefix_value));
+        }
+    }
+
     let html = reqwest::blocking::get(&url).unwrap().text().unwrap();
     let document = Html::parse_document(&html);
     //println!("{}", document.html());//TODO: Some message if response html is only a captcha
@@ -86,31 +109,43 @@ pub fn scrape(
                             .expect("Attribute not found");
 
                         full_text = attribute_value.to_string();
-                        content_vec.push(full_text);
-
-                        continue;
                     }
                 }
 
-                for node in element.children() {
-                    match node.value() {
-                        Node::Text(text) => {
-                            full_text = format!("{} {}", full_text, text.trim());
-                        }
-                        Node::Element(_el) => {
-                            let element_ref = ElementRef::wrap(node).unwrap();
-                            let element_text = element_ref.text().collect::<Vec<&str>>();
-
-                            let mut text_to_append = String::new();
-                            for text in element_text {
-                                text_to_append = format!("{}{}", text_to_append, text);
+                if full_text.is_empty() {
+                    for node in element.children() {
+                        match node.value() {
+                            Node::Text(text) => {
+                                full_text = format!("{} {}", full_text, text.trim());
                             }
+                            Node::Element(_el) => {
+                                let element_ref = ElementRef::wrap(node).unwrap();
+                                let element_text = element_ref.text().collect::<Vec<&str>>();
 
-                            full_text = format!("{}{}", full_text, text_to_append);
+                                let mut text_to_append = String::new();
+                                for text in element_text {
+                                    text_to_append = format!("{}{}", text_to_append, text);
+                                }
+
+                                full_text = format!("{}{}", full_text, text_to_append);
+                            }
+                            _ => (),
                         }
-                        _ => (),
                     }
                 }
+
+                //Add prefix and suffix
+                if parsed_prefixes.len() > 0 {
+                    let prefixes = parsed_prefixes
+                        .iter()
+                        .filter(|&a| a.0 == index)
+                        .collect::<Vec<&(usize, &str)>>();
+
+                    if prefixes.len() > 0 {
+                        full_text = format!("{}{}", prefixes.first().unwrap().1, full_text);
+                    }
+                }
+
                 content_vec.push(full_text);
             }
 
@@ -163,7 +198,9 @@ pub fn scrape(
                 .prompt();
 
             match answer {
-                Ok(true) => save_scrape(&save, &url, selectors, keys, attributes, title, present),
+                Ok(true) => save_scrape(
+                    &save, &url, selectors, keys, attributes, prefixes, title, present,
+                ),
                 Ok(false) => println!("Skipped saving"),
                 Err(_) => println!("Error with questionnaire, try again later"),
             }
@@ -199,6 +236,7 @@ fn save_scrape(
     selectors: Vec<String>,
     keys: Vec<String>,
     attributes: Option<Vec<String>>,
+    prefixes: Option<Vec<String>>,
     title: Option<String>,
     presentation: Option<Presentation>,
 ) {
@@ -245,6 +283,11 @@ fn save_scrape(
             None => Vec::new(),
         };
 
+        let prefixes_to_write = match prefixes {
+            Some(t) => t,
+            None => Vec::new(),
+        };
+
         let presentation_to_write = match presentation {
             Some(p) => p.to_string().to_lowercase(),
             None => "".to_string(),
@@ -252,8 +295,15 @@ fn save_scrape(
 
         writeln!(
             file,
-            "{};{};{:?};{:?};{:?};{};{}",
-            name, url, selectors, keys, attributes_to_write, title_to_write, presentation_to_write
+            "{};{};{:?};{:?};{:?};{:?};{};{}",
+            name,
+            url,
+            selectors,
+            keys,
+            attributes_to_write,
+            prefixes_to_write,
+            title_to_write,
+            presentation_to_write
         )
         .unwrap();
     }

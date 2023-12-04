@@ -55,14 +55,27 @@ fn run_scrape(data: Vec<&str>) {
         None
     };
 
-    let title: Option<String> = if data[5].len() > 0 {
-        Some(data[5].to_string())
+    let prefixes: Option<Vec<String>> = if data[5].len() > 2 {
+        Some(
+            data[5][1..data[5].len() - 1]
+                .split(", ")
+                .collect::<Vec<&str>>()
+                .iter()
+                .map(|&s| s.trim().replace("\"", "").to_string())
+                .collect::<Vec<String>>(),
+        )
     } else {
         None
     };
 
-    let presentation = if data[6].len() > 0 {
-        if data[6].to_lowercase() == "table" {
+    let title: Option<String> = if data[6].len() > 0 {
+        Some(data[6].to_string())
+    } else {
+        None
+    };
+
+    let presentation = if data[7].len() > 0 {
+        if data[7].to_lowercase() == "table" {
             Some(Presentation::Table)
         } else {
             Some(Presentation::List)
@@ -76,6 +89,7 @@ fn run_scrape(data: Vec<&str>) {
         selectors,
         keys,
         attributes,
+        prefixes,
         title,
         None,
         presentation,

@@ -15,6 +15,7 @@ fn main() {
             cmd.selectors,
             cmd.keys,
             cmd.attributes,
+            cmd.prefixes,
             cmd.title,
             cmd.save,
             cmd.present,

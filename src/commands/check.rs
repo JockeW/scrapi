@@ -39,8 +39,9 @@ fn print_scrape_info(data_str: &str) {
         println!("Selectors: {}", data[2]);
         println!("Keys: {}", data[3]);
         println!("Attributes: {}", data[4]);
-        println!("Title: {}", data[5]);
-        println!("Present: {}", data[6]);
+        println!("Prefixes: {}", data[5]);
+        println!("Title: {}", data[6]);
+        println!("Present: {}", data[7]);
 
         let selectors: String = data[2].replace("[", "").replace("]", "").replace(",", "");
         let keys: String = data[3].replace("[", "").replace("]", "").replace(",", "");
@@ -48,6 +49,13 @@ fn print_scrape_info(data_str: &str) {
         let attributes_string = data[4].replace("[", "").replace("]", "").replace(",", "");
         let attributes = if attributes_string.len() > 0 {
             format!(" --attributes {}", attributes_string)
+        } else {
+            "".to_string()
+        };
+
+        let prefixes_string = data[5].replace("[", "").replace("]", "").replace(",", "");
+        let prefixes = if prefixes_string.len() > 0 {
+            format!(" --prefixes {}", prefixes_string)
         } else {
             "".to_string()
         };
@@ -67,8 +75,8 @@ fn print_scrape_info(data_str: &str) {
         println!(
             "Full command: {}",
             format!(
-                "scrape --url \"{}\" --selectors {} --keys {}{}{}{}",
-                data[1], selectors, keys, attributes, title, presentation
+                "scrape --url \"{}\" --selectors {} --keys {}{}{}{}{}",
+                data[1], selectors, keys, attributes, prefixes, title, presentation
             )
         );
     }
