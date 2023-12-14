@@ -26,7 +26,8 @@ pub enum RScrapeCommand {
     // Update(UpdateCommand)
 
     // Scrape and inspect. Args for url, search and filter
-    // Inspect(InspectCommand)
+    Inspect(InspectCommand),
+
     /// Run saved scrape
     Run(RunCommand),
     // Delete saved scrape. OBS!! HANDLE SAVED COMBINED SCRAPES THAT MIGHT BE USING THIS SCRAPE
@@ -100,6 +101,16 @@ pub struct CheckCommand {
 pub struct RunCommand {
     #[arg(required = true)]
     pub name: String,
+}
+
+#[derive(Debug, Args)]
+pub struct InspectCommand {
+    #[arg(short, long, required = true)]
+    pub url: String,
+    #[arg(short, long, required = false)]
+    pub filter: Option<String>,
+    #[arg(short, long, required = false)]
+    pub search: Option<String>,
 }
 
 // impl fmt::Display for ScrapeCommand {
