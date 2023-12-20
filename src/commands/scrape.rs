@@ -102,7 +102,7 @@ pub fn scrape(
 
     let html = reqwest::blocking::get(&url).unwrap().text().unwrap();
     let document = Html::parse_document(&html);
-    //println!("{}", document.html());//TODO: Some message if response html is only a captcha
+    //println!("{}", document.html());//TODO: Some message if response html is only a captcha. Or does it work with WebDriver? For example Ticketmaster site.
 
     let mut contents: Vec<Vec<String>> = Vec::new();
 
