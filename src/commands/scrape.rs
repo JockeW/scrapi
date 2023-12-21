@@ -8,7 +8,7 @@ use colored::Colorize;
 use inquire::Confirm;
 use scraper::{ElementRef, Html, Node, Selector};
 
-use crate::args::Presentation;
+use crate::enums::Presentation;
 
 pub fn scrape(
     url: String,

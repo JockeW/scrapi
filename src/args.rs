@@ -1,6 +1,5 @@
+use crate::enums::Presentation;
 use clap::{Args, Parser, Subcommand};
-use std::fmt;
-use std::str::FromStr;
 
 #[derive(Debug, Parser)]
 #[clap(author, version, about)]
@@ -26,39 +25,11 @@ pub enum RScrapeCommand {
     // Update(UpdateCommand)
 
     // Scrape and inspect. Args for url, search and filter
-    Inspect(InspectCommand),
-
+    //Inspect(InspectCommand),
     /// Run saved scrape
     Run(RunCommand),
     // Delete saved scrape. OBS!! HANDLE SAVED COMBINED SCRAPES THAT MIGHT BE USING THIS SCRAPE
     // Delete(DeleteCommand)
-}
-
-#[derive(clap::ValueEnum, Clone, Debug, PartialEq, Eq)]
-pub enum Presentation {
-    List,
-    Table,
-}
-
-impl fmt::Display for Presentation {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Presentation::List => write!(f, "List"),
-            Presentation::Table => write!(f, "Table"),
-        }
-    }
-}
-
-impl FromStr for Presentation {
-    type Err = ();
-
-    fn from_str(input: &str) -> Result<Presentation, Self::Err> {
-        match input {
-            "List" => Ok(Presentation::List),
-            "Table" => Ok(Presentation::Table),
-            _ => Err(()),
-        }
-    }
 }
 
 #[derive(Debug, Args)]

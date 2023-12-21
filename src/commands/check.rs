@@ -1,48 +1,30 @@
-use crate::utils::get_saved_scrape;
+use crate::{utils::get_saved_scrape, structs::Scrape};
 
 pub fn check(name: String) {
     let scrape_data = get_saved_scrape(&name);
 
     match scrape_data {
-        Some(data) => print_scrape_info(data),
+        Some(scrapes) => print_scrape_info(scrapes),
         None => println!("Scrape {} not found!", &name),
     }
 }
 
-fn print_scrape_info(data_str: &str) {
-    let data: Vec<&str> = data_str.split(";").collect();
+fn print_scrape_info(scrapes: Vec<Scrape>) {
 
-    if data[0] == "combined" {
-        let scrape_names: Vec<String> = data[2]
-            .replace("[", "")
-            .replace("]", "")
-            .replace(",", "")
-            .replace("\"", "")
-            .split(' ')
-            .map(|s| s.to_string())
-            .collect();
-
-        for name in scrape_names {
-            let scrape = get_saved_scrape(&name);
-            if let Some(scrape) = scrape {
-                print(scrape.split(";").collect());
-                println!();
-            }
-        }
-    } else {
-        print(data);
+    for scrape in scrapes {
+        
     }
 
-    fn print(data: Vec<&str>) {
-        println!("Name: {}", data[0]);
-        println!("Url: {}", data[1]);
-        println!("Selectors: {}", data[2]);
-        println!("Keys: {}", data[3]);
-        println!("Attributes: {}", data[4]);
-        println!("Prefixes: {}", data[5]);
-        println!("Suffixes: {}", data[6]);
-        println!("Title: {}", data[7]);
-        println!("Present: {}", data[8]);
+    fn print(scrape: Scrape) {
+        println!("Name: {}", scrape.name);
+        println!("Url: {}", scrape.url);
+        println!("Selectors: {:?}", scrape.selectors);
+        println!("Keys: {:?}", scrape.keys);
+        println!("Attributes: {:?}", scrape.attributes);
+        println!("Prefixes: {:?}", scrape.prefixes);
+        println!("Suffixes: {:?}", scrape.suffixes);
+        println!("Title: {:?}", scrape.title);
+        println!("Present: {:?}", scrape.presentation);
 
         let selectors: String = data[2].replace("[", "").replace("]", "").replace(",", "");
         let keys: String = data[3].replace("[", "").replace("]", "").replace(",", "");
@@ -84,7 +66,7 @@ fn print_scrape_info(data_str: &str) {
             "Full command: {}",
             format!(
                 "scrape --url \"{}\" --selectors {} --keys {}{}{}{}{}{}",
-                data[1], selectors, keys, attributes, prefixes, suffixes, title, presentation
+                scrape.url, selectors, keys, attributes, prefixes, suffixes, title, presentation
             )
         );
     }
