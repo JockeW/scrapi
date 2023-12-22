@@ -121,5 +121,6 @@ fn print_scrape_info(scrapes: Vec<Scrape>) {
                 presentation_full_command
             )
         );
+        println!();
     }
 }
