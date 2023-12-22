@@ -23,10 +23,9 @@ pub fn get_saved_scrape(name: &str) -> Option<Vec<Scrape>> {
             let scrapes_in_combined = scrape.split(';').collect::<Vec<&str>>()[2]
                 .replace("[", "")
                 .replace("]", "")
-                .replace(",", "")
                 .replace("\"", "")
-                .split(' ')
-                .map(|s| s.trim().to_string())
+                .split(',')
+                .map(|s| s.trim().replace(",", "").to_string())
                 .collect::<Vec<String>>();
 
             for sc in scrapes_in_combined {
@@ -50,6 +49,7 @@ pub fn get_saved_scrape(name: &str) -> Option<Vec<Scrape>> {
 }
 
 fn get_scrape_from_str(data_str: &str) -> Scrape {
+    println!("DATA STR: {}", data_str);
     let data: Vec<String> = data_str.split(";").map(|s| s.to_owned()).collect();
     let name = &data[0];
     let url = &data[1];
