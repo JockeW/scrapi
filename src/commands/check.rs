@@ -1,4 +1,4 @@
-use crate::{utils::get_saved_scrape, structs::Scrape};
+use crate::{structs::Scrape, utils::get_saved_scrape};
 
 pub fn check(name: String) {
     let scrape_data = get_saved_scrape(&name);
@@ -10,54 +10,99 @@ pub fn check(name: String) {
 }
 
 fn print_scrape_info(scrapes: Vec<Scrape>) {
-
     for scrape in scrapes {
-        
-    }
-
-    fn print(scrape: Scrape) {
+        let attributes = if let Some(attributes) = scrape.attributes {
+            attributes
+        } else {
+            Vec::new()
+        };
+        let prefixes = if let Some(prefixes) = scrape.prefixes {
+            prefixes
+        } else {
+            Vec::new()
+        };
+        let suffixes = if let Some(suffixes) = scrape.suffixes {
+            suffixes
+        } else {
+            Vec::new()
+        };
+        let title = if let Some(title) = scrape.title {
+            title
+        } else {
+            "".to_string()
+        };
+        let presentation = if let Some(presentation) = scrape.presentation {
+            presentation.to_string()
+        } else {
+            "".to_string()
+        };
         println!("Name: {}", scrape.name);
         println!("Url: {}", scrape.url);
         println!("Selectors: {:?}", scrape.selectors);
         println!("Keys: {:?}", scrape.keys);
-        println!("Attributes: {:?}", scrape.attributes);
-        println!("Prefixes: {:?}", scrape.prefixes);
-        println!("Suffixes: {:?}", scrape.suffixes);
-        println!("Title: {:?}", scrape.title);
-        println!("Present: {:?}", scrape.presentation);
+        println!("Attributes: {:?}", attributes);
+        println!("Prefixes: {:?}", prefixes);
+        println!("Suffixes: {:?}", suffixes);
+        println!("Title: {:?}", title);
+        println!("Present: {:?}", presentation);
 
-        let selectors: String = data[2].replace("[", "").replace("]", "").replace(",", "");
-        let keys: String = data[3].replace("[", "").replace("]", "").replace(",", "");
+        let selectors_full_command: String = scrape
+            .selectors
+            .iter()
+            .map(|s| format!("\"{}\"", s))
+            .reduce(|acc, e| acc + " " + &e)
+            .unwrap();
 
-        let attributes_string = data[4].replace("[", "").replace("]", "").replace(",", "");
-        let attributes = if attributes_string.len() > 0 {
+        let keys_full_command: String = scrape
+            .keys
+            .iter()
+            .map(|s| format!("\"{}\"", s))
+            .reduce(|acc, e| acc + " " + &e)
+            .unwrap();
+
+        let attributes_full_command = if attributes.len() > 0 {
+            let attributes_string = attributes
+                .iter()
+                .map(|s| format!("\"{}\"", s))
+                .reduce(|acc, e| acc + " " + &e)
+                .unwrap();
+
             format!(" --attributes {}", attributes_string)
         } else {
             "".to_string()
         };
 
-        let prefixes_string = data[5].replace("[", "").replace("]", "").replace(",", "");
-        let prefixes = if prefixes_string.len() > 0 {
+        let prefixes_full_command = if prefixes.len() > 0 {
+            let prefixes_string = prefixes
+                .iter()
+                .map(|s| format!("\"{}\"", s))
+                .reduce(|acc, e| acc + " " + &e)
+                .unwrap();
             format!(" --prefixes {}", prefixes_string)
         } else {
             "".to_string()
         };
 
-        let suffixes_string = data[6].replace("[", "").replace("]", "").replace(",", "");
-        let suffixes = if suffixes_string.len() > 0 {
+        let suffixes_full_command = if suffixes.len() > 0 {
+            let suffixes_string = suffixes
+                .iter()
+                .map(|s| format!("\"{}\"", s))
+                .reduce(|acc, e| acc + " " + &e)
+                .unwrap();
+
             format!(" --suffixes {}", suffixes_string)
         } else {
             "".to_string()
         };
 
-        let title: String = if data[7].len() > 0 {
-            format!(" --title \"{}\"", data[7])
+        let title_full_command: String = if !title.is_empty() {
+            format!(" --title \"{}\"", title)
         } else {
             "".to_string()
         };
 
-        let presentation: String = if data[8].len() > 0 {
-            format!(" --present \"{}\"", data[8])
+        let presentation_full_command: String = if !presentation.is_empty() {
+            format!(" --present \"{}\"", presentation)
         } else {
             "".to_string()
         };
@@ -66,7 +111,14 @@ fn print_scrape_info(scrapes: Vec<Scrape>) {
             "Full command: {}",
             format!(
                 "scrape --url \"{}\" --selectors {} --keys {}{}{}{}{}{}",
-                scrape.url, selectors, keys, attributes, prefixes, suffixes, title, presentation
+                scrape.url,
+                selectors_full_command,
+                keys_full_command,
+                attributes_full_command,
+                prefixes_full_command,
+                suffixes_full_command,
+                title_full_command,
+                presentation_full_command
             )
         );
     }

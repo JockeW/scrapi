@@ -1,5 +1,6 @@
 use crate::enums::Presentation;
 
+#[derive(Debug)]
 pub struct Scrape {
     pub name: String,
     pub url: String,

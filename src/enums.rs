@@ -9,8 +9,8 @@ pub enum Presentation {
 impl fmt::Display for Presentation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Presentation::List => write!(f, "List"),
-            Presentation::Table => write!(f, "Table"),
+            Presentation::List => write!(f, "list"),
+            Presentation::Table => write!(f, "table"),
         }
     }
 }
@@ -20,8 +20,8 @@ impl FromStr for Presentation {
 
     fn from_str(input: &str) -> Result<Presentation, Self::Err> {
         match input {
-            "List" => Ok(Presentation::List),
-            "Table" => Ok(Presentation::Table),
+            "list" => Ok(Presentation::List),
+            "table" => Ok(Presentation::Table),
             _ => Err(()),
         }
     }

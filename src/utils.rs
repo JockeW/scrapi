@@ -36,7 +36,7 @@ pub fn get_saved_scrape(name: &str) -> Option<Vec<Scrape>> {
                     .map(|&s| s);
 
                 if let Some(s) = saved_scrape {
-                    scrapes.push(get_scrape_from_str(scrape));
+                    scrapes.push(get_scrape_from_str(s));
                 }
             }
         } else {
@@ -51,8 +51,8 @@ pub fn get_saved_scrape(name: &str) -> Option<Vec<Scrape>> {
 
 fn get_scrape_from_str(data_str: &str) -> Scrape {
     let data: Vec<String> = data_str.split(";").map(|s| s.to_owned()).collect();
-    let name = data[0];
-    let url = data[1];
+    let name = &data[0];
+    let url = &data[1];
     let selectors = data[2][1..data[2].len() - 1]
         .split(", ")
         .collect::<Vec<&str>>()
@@ -107,13 +107,13 @@ fn get_scrape_from_str(data_str: &str) -> Scrape {
     };
 
     let title: Option<String> = if data[7].len() > 0 {
-        Some(data[7])
+        Some(data[7].clone())
     } else {
         None
     };
 
     let presentation = if data[8].len() > 0 {
-        if data[8].to_lowercase() == "table" {
+        if data[8].trim() == "table" {
             Some(Presentation::Table)
         } else {
             Some(Presentation::List)
@@ -122,15 +122,15 @@ fn get_scrape_from_str(data_str: &str) -> Scrape {
         None
     };
 
-    let export: Option<String> = if data[9].len() > 0 {
-        Some(data[9])
-    } else {
-        None
-    };
+    // let export: Option<String> = if data[9].len() > 0 {
+    //     Some(data[9].clone())
+    // } else {
+    //     None
+    // };
 
     Scrape {
-        name,
-        url,
+        name: name.to_string(),
+        url: url.to_string(),
         selectors,
         keys,
         attributes,
@@ -138,6 +138,6 @@ fn get_scrape_from_str(data_str: &str) -> Scrape {
         suffixes,
         title,
         presentation,
-        export,
+        export: None, //TODO: Update when using export
     }
 }
