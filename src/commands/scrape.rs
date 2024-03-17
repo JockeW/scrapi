@@ -185,6 +185,7 @@ pub fn scrape(
             contents.push(content_vec);
         } else {
             println!("No elements found for selector: {}", s);
+            return;
         }
     }
 
