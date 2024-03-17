@@ -26,6 +26,7 @@ fn main() {
         args::RScrapeCommand::Check(cmd) => commands::check::check(cmd.name),
         args::RScrapeCommand::Run(cmd) => commands::run::run(cmd.name),
         args::RScrapeCommand::Combine(cmd) => commands::combine::combine(cmd.name, cmd.scrapes),
+        args::RScrapeCommand::List(_cmd) => commands::list::list(),
         //args::RScrapeCommand::Inspect(cmd) => commands::inspect::inspect(cmd.url, cmd.filter, cmd.search)
     }
 }

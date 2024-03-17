@@ -1,5 +1,36 @@
 use crate::{enums::Presentation, structs::Scrape};
 
+pub fn get_all_scrape_names() -> Vec<String> {
+    let file_content = include_str!("../scrapes.txt");
+
+    let lines: Vec<&str> = file_content.trim().split('\n').collect();
+    let saved_scrapes: Vec<&str> = lines.iter().map(|l| l.trim()).collect();
+
+    let mut scrape_names: Vec<String> = Vec::new();
+
+    for scrape in saved_scrapes {
+        if scrape.split(';').collect::<Vec<&str>>()[0] == "combined" {
+            scrape_names.push(
+                scrape
+                    .split(';')
+                    .map(|s| format!("{} (combined)", s).clone())
+                    .collect::<Vec<String>>()[1]
+                    .clone(),
+            )
+        } else {
+            scrape_names.push(
+                scrape
+                    .split(';')
+                    .map(|s| s.to_owned())
+                    .collect::<Vec<String>>()[0]
+                    .clone(),
+            )
+        }
+    }
+
+    return scrape_names;
+}
+
 pub fn get_saved_scrape(name: &str) -> Option<Vec<Scrape>> {
     let file_content = include_str!("../scrapes.txt");
 

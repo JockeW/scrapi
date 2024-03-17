@@ -16,8 +16,8 @@ pub enum RScrapeCommand {
     /// Check command, to check saved scrape and get all saved data presented nicely
     Check(CheckCommand),
 
-    // List all saved scrapes
-    // List(ListCommand)
+    /// List the name of all saved scrapes
+    List(ListCommand),
     /// Combine saved scrapes
     Combine(CombineCommand),
 
@@ -67,6 +67,9 @@ pub struct CheckCommand {
     #[arg(required = true)]
     pub name: String,
 }
+
+#[derive(Debug, Args)]
+pub struct ListCommand {}
 
 #[derive(Debug, Args)]
 pub struct RunCommand {
