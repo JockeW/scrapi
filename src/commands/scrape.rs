@@ -292,7 +292,7 @@ fn save_scrape(
             Err(e) => println!("ERROR: {}", e),
         }
     }
-    println!("LINES: {:?}", lines);
+
     let saved_scrapes: Vec<&str> = lines.iter().map(|l| l.as_str()).collect();
 
     let scrape_names: Vec<&str> = saved_scrapes

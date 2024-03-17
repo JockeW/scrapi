@@ -28,8 +28,9 @@ pub enum RScrapeCommand {
     //Inspect(InspectCommand),
     /// Run saved scrape
     Run(RunCommand),
-    // Delete saved scrape. OBS!! HANDLE SAVED COMBINED SCRAPES THAT MIGHT BE USING THIS SCRAPE
-    // Delete(DeleteCommand)
+
+    /// Delete saved scrape. OBS!! HANDLE SAVED COMBINED SCRAPES THAT MIGHT BE USING THIS SCRAPE
+    Delete(DeleteCommand)
 }
 
 #[derive(Debug, Args)]
@@ -69,6 +70,12 @@ pub struct CheckCommand {
 }
 
 #[derive(Debug, Args)]
+pub struct DeleteCommand {
+    #[arg(required = true)]
+    pub name: String,
+}
+
+#[derive(Debug, Args)]
 pub struct ListCommand {}
 
 #[derive(Debug, Args)]
@@ -86,48 +93,3 @@ pub struct InspectCommand {
     #[arg(short, long, required = false)]
     pub search: Option<String>,
 }
-
-// impl fmt::Display for ScrapeCommand {
-//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-//         //TODO: Fix selectors and keys. Should not be printed as array!
-
-//         let selectors = self.selectors.iter().map(|val| format!("{}", val)).collect::<Vec<String>>().join(" ");
-//         // let mut selectors = String::new();
-//         // for selector in &self.selectors {
-//         //     let sel = format!("{} ", selector);
-//         //     selectors.push_str(selector);
-//         // }
-
-//         //let together: Vec<&str> = self.selectors.iter().map(|s| s.as_str()).collect();
-
-//         let title;
-//         match &self.title {
-//             Some(t) => title = format!(" --title=\"{}\"",t.as_str()),
-//             None => title = "".to_string(),
-//         }
-
-//         // let save;
-//         // match &self.save {
-//         //     Some(s) => save = format!(" --save\"{}\"",s.as_str()),
-//         //     None => save = "".to_string(),
-//         // }
-
-//         let present;
-//         match &self.present {
-//             Some(p) => {
-//                 if *p == Presentation::List {
-//                     present = " --present list";
-//                 } else {
-//                     present = " --present table";
-//                 }
-//             },
-//             None => present = "",
-//         }
-
-//         write!(
-//             f,
-//             "scrape --url {} --selectors {} --keys {:?}{}{}",
-//             self.url, selectors, self.keys, title, present
-//         )
-//     }
-// }

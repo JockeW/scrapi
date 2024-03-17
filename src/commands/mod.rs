@@ -4,3 +4,4 @@ pub mod run;
 pub mod combine;
 pub mod inspect;
 pub mod list;
+pub mod delete;
