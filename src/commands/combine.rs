@@ -23,25 +23,37 @@ pub fn combine(name: String, scrapes: Vec<String>) {
 
     let scrape_names: Vec<&str> = saved_scrapes
         .iter()
+        .filter(|&&s| s.split(';').collect::<Vec<&str>>()[0] != "combined")
         .map(|s| s.split(';').collect::<Vec<&str>>()[0])
-        .collect(); //TODO: Change scrape_names to contain names of combined scrapes instead of just "combined"
+        .collect();
 
-    if scrape_names.contains(&name.to_lowercase().as_str()) {
+    let combined_scrape_names: Vec<&str> = saved_scrapes
+        .iter()
+        .filter(|&&s| s.split(';').collect::<Vec<&str>>()[0] == "combined")
+        .map(|s| s.split(';').collect::<Vec<&str>>()[1])
+        .collect();
+
+    if scrape_names.contains(&name.to_lowercase().as_str())
+        || combined_scrape_names.contains(&name.to_lowercase().as_str())
+    {
         println!("There is already a scrape with that name: '{}'", name);
         //TODO: Prompt user with options for entering a new name or cancel
     } else if name.to_lowercase() == "combined" {
         println!("'combined' is a reserved word");
     } else {
-        let mut all_scrapes_exists = true;
         for scrape in &scrapes {
             if !scrape_names.contains(&scrape.as_str()) {
                 println!("There is no saved scrape: '{}'", scrape);
-                all_scrapes_exists = false;
+                return;
+            } else if combined_scrape_names.contains(&scrape.as_str()) {
+                println!(
+                    "You can't combine with other combined scrapes: '{}'",
+                    scrape
+                );
+                return;
             }
         }
 
-        if all_scrapes_exists {
-            writeln!(file, "combined;{};{:?}", name, scrapes).unwrap();
-        }
+        writeln!(file, "combined;{};{:?}", name, scrapes).unwrap();
     }
 }
