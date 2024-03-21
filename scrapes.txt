@@ -3,4 +3,5 @@ combined;newsconcerts;["concerts", "news"]
 concerts;https://www.livenation.se/event/allevents?genres=hard-rock-and-metal&utm_source=adp&page=1;[".result-info__localizedname", ".event-date__date"];["Band", "Date"];[];[];[];Concerts TITLE;table
 news with prefix and suffix;https://www.dn.se/;[".ds-theme--Nyheter .ds-teaser-list-vertical__item-title", ".ds-theme--Nyheter .ds-teaser-footer__notes", ".ds-theme--Nyheter .ds-teaser-list-vertical__content>a", ".ds-teaser-list-vertical__content>a"];["Headline", "Time", "Link", "Data Id"];["2:href", "3:data-id"];["2:https://www.dn.se"];["0: - SPÄNNANDE NYHET", "1: O'clock"];News with prefix AND suffix;table
 news with prefix;https://www.dn.se/;[".ds-teaser-list-vertical__item-title", ".ds-teaser-list-vertical__item-notes>span:nth-child(1)", ".ds-teaser-list-vertical__content>a", ".ds-teaser-list-vertical__content>a"];["Headline", "Time", "Link", "Data Id"];["2:href", "3:data-id"];["2:https://www.dn.se"];[];News with prefix;table
-combined;newscombined;["news with prefix", "concerts", "news with prefix and suffix"]
+combined;newsconcertscombined;["news with prefix", "concerts", "news with prefix and suffix"]
+combined;newscombined;["news with prefix", "news with prefix and suffix"]

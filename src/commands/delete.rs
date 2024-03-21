@@ -5,37 +5,34 @@ use std::{
 
 use inquire::Confirm;
 
+use crate::utils::{get_combined_scrapes_for_scrape, get_scrape_name};
+
 pub fn delete(name: String) {
-    //TODO: If not a combined scrape, check if any combined is using the scrape that will be removed. Prompt user for confirmation before continuing removal
     let file: File = OpenOptions::new().read(true).open("scrapes.txt").unwrap();
 
     let reader = BufReader::new(&file);
 
     let mut scrape_found = false;
-    let mut is_combined = false;
-    let mut lines_to_write = Vec::new();
+    let mut lines_not_to_delete = Vec::new();
+    let mut combined_scrapes_to_update: Vec<&str> = Vec::new();
 
     let result_lines: Lines<BufReader<&File>> = reader.lines();
     let lines = result_lines.map(|x| x.unwrap()).collect::<Vec<String>>();
     for line in lines.iter() {
-        //let line = line.unwrap();
         let line_parts = line.split(';').collect::<Vec<&str>>();
 
-        let scrape_name = if is_combined {
-            line_parts[1]
-        } else {
-            line_parts[0]
-        };
+        let is_combined = line_parts[0].trim() == "combined";
+
+        let scrape_name = get_scrape_name(line);
 
         if scrape_name == &name {
             scrape_found = true;
-            is_combined = line_parts[0].trim() == "combined";
+
             if !is_combined {
-                //TODO: Handle it here instead?
-                // let updated_combined = handle_combined(&lines, name.clone());
+                combined_scrapes_to_update = get_combined_scrapes_for_scrape(&name);
             }
         } else {
-            lines_to_write.push(line);
+            lines_not_to_delete.push(line);
         }
     }
 
@@ -44,54 +41,35 @@ pub fn delete(name: String) {
         return;
     }
 
-    if !is_combined {
-        let combined_scrapes_using_deleted_scrape = lines
-            .iter()
-            .filter(|&l| {
-                l.split(';').collect::<Vec<&str>>()[0] == "combined"
-                    && l.split(';').collect::<Vec<&str>>()[2]
-                        .replace("[", "")
-                        .replace("]", "")
-                        .replace("\"", "")
-                        .split(',')
-                        .map(|s| s.trim().replace(",", ""))
-                        .collect::<Vec<String>>()
-                        .contains(&name)
-            })
-            .map(|x| x.as_str())
-            .collect::<Vec<&str>>();
+    let mut lines_to_write: Vec<&String> = Vec::new();
+    let mut updated_combined_scrapes: Vec<String> = Vec::new();
 
-        let combined_scrape_names = combined_scrapes_using_deleted_scrape
-            .iter()
-            .map(|x| x.split(';').collect::<Vec<&str>>()[1])
-            .collect::<Vec<&str>>();
+    if combined_scrapes_to_update.len() > 0 {
+        let update_combined_option = handle_combined(combined_scrapes_to_update, &name);
 
-        if combined_scrapes_using_deleted_scrape.len() > 0 {
-            lines_to_write = lines_to_write
-                .iter()
-                .filter(|&&x| {
-                    x.split(';').collect::<Vec<&str>>()[0] == "combined"
-                        && combined_scrape_names
-                            .iter()
-                            .any(|&c| c == x.split(';').collect::<Vec<&str>>()[1])
-                            == false
-                })
-                .map(|x| *x)
-                .collect::<Vec<&String>>();
+        match update_combined_option {
+            Some(mut combined_scrapes) => {
+                updated_combined_scrapes.append(&mut combined_scrapes);
 
-            let combined_scrapes =
-                handle_combined(combined_scrapes_using_deleted_scrape, name.clone());
-
-            match combined_scrapes {
-                Some(scrapes) => {
-                    for scrape in scrapes {
-                        let test = scrape.clone();
-                        lines_to_write.push(&test);
-                    }
+                for combined_scrape in updated_combined_scrapes.iter() {
+                    lines_to_write.push(combined_scrape);
                 }
-                None => return,
             }
+            None => return,
         }
+    }
+
+    for line in lines_not_to_delete {
+        let scrape_name = get_scrape_name(line);
+        let exists = lines_to_write
+            .iter()
+            .find(|&&x| get_scrape_name(x) == scrape_name)
+            .is_some();
+
+        if exists {
+            continue;
+        }
+        lines_to_write.push(line);
     }
 
     File::create("scrapes.txt.temp").unwrap();
@@ -115,25 +93,9 @@ pub fn delete(name: String) {
 
 fn handle_combined(
     combined_scrapes_using_deleted_scrape: Vec<&str>,
-    name: String,
+    name: &str,
 ) -> Option<Vec<String>> {
     let mut updated_combined_scrapes: Vec<String> = Vec::new();
-
-    // let combined_scrapes_using_deleted_scrape = lines
-    //     .iter()
-    //     .filter(|&l| {
-    //         l.split(';').collect::<Vec<&str>>()[0] == "combined"
-    //             && l.split(';').collect::<Vec<&str>>()[2]
-    //                 .replace("[", "")
-    //                 .replace("]", "")
-    //                 .replace("\"", "")
-    //                 .split(',')
-    //                 .map(|s| s.trim().replace(",", ""))
-    //                 .collect::<Vec<String>>()
-    //                 .contains(&name)
-    //     })
-    //     .map(|x| x.as_str())
-    //     .collect::<Vec<&str>>();
 
     let mut message = format!("The following combined scrapes are using this scrape: ");
 
@@ -180,7 +142,7 @@ fn handle_combined(
         Ok(true) => Some(updated_combined_scrapes),
         Ok(false) => {
             println!("The scrape was NOT deleted");
-            return None;
+            None
         }
         Err(_) => {
             println!("Error with questionnaire, try again later");

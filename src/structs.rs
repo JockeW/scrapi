@@ -13,3 +13,8 @@ pub struct Scrape {
     pub presentation: Option<Presentation>,
     pub export: Option<String>
 }
+
+pub struct CombinedScrape {
+    pub name: String,
+    pub scrapes: Vec<Scrape>
+}
