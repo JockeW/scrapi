@@ -212,8 +212,8 @@ fn get_scrape_from_str(data_str: &str) -> Scrape {
         None
     };
 
-    let title: Option<String> = if data[7].len() > 0 {
-        Some(data[7].clone())
+    let title: Option<String> = if data[7].trim().len() > 0 {
+        Some(data[7].clone().trim().to_string())
     } else {
         None
     };
@@ -228,11 +228,11 @@ fn get_scrape_from_str(data_str: &str) -> Scrape {
         None
     };
 
-    // let export: Option<String> = if data[9].len() > 0 {
-    //     Some(data[9].clone())
-    // } else {
-    //     None
-    // };
+    let export: Option<String> = if data[9].trim().len() > 0 {
+        Some(data[9].clone().trim().to_string())
+    } else {
+        None
+    };
 
     Scrape {
         name: name.to_string(),
@@ -244,6 +244,6 @@ fn get_scrape_from_str(data_str: &str) -> Scrape {
         suffixes,
         title,
         presentation,
-        export: None, //TODO: Update when using export
+        export,
     }
 }

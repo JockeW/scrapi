@@ -1,5 +1,6 @@
 use std::{
-    fs::OpenOptions,
+    collections::HashMap,
+    fs::{File, OpenOptions},
     io::{BufRead, BufReader, Write},
 };
 
@@ -7,6 +8,7 @@ use cli_table::{Cell, Style, Table};
 use colored::Colorize;
 use inquire::Confirm;
 use scraper::{ElementRef, Html, Node, Selector};
+use serde_json::{json, to_writer};
 
 use crate::enums::Presentation;
 
@@ -20,6 +22,7 @@ pub fn scrape(
     title: Option<String>,
     save: Option<String>,
     present: Option<Presentation>,
+    export: Option<String>,
 ) {
     if keys.len() != selectors.len() {
         println!(
@@ -214,12 +217,54 @@ pub fn scrape(
 
     match present {
         Some(Presentation::List) => {
-            print_content_list(all_content, keys.iter().map(|k| k.as_str()).collect());
+            print_content_list(&all_content, keys.iter().map(|k| k.as_str()).collect());
         }
         Some(Presentation::Table) => {
-            print_content_table(all_content, keys.iter().map(|k| k.as_str()).collect());
+            print_content_table(&all_content, keys.iter().map(|k| k.as_str()).collect());
         }
         None => (),
+    }
+
+    if let Some(export) = export {
+        let file_type = export.split('.').last().unwrap();
+
+        match file_type {
+            "json" => {
+                let file = File::create(export).unwrap();
+
+                let title_to_write = match &title {
+                    Some(t) => t,
+                    None => "",
+                };
+
+                let mut results: Vec<HashMap<&String, &str>> = Vec::new();
+
+                for content in all_content {
+                    let mut hash_map = HashMap::new();
+                    for (i, data_str) in content.iter().enumerate() {
+                        let key = &keys[i];
+                        let value = *data_str;
+                        hash_map.insert(key, value);
+                    }
+
+                    results.push(hash_map);
+                }
+
+                let data = json!({
+                    "title": title_to_write,
+                    "results": results
+                });
+
+                to_writer(&file, &data).unwrap();
+
+                println!("JSON file created successfully.");
+            }
+            "csv" => (),
+            _ => {
+                println!("The supported file types are '.json' and '.csv'");
+                return;
+            }
+        }
     }
 
     if let Some(save) = save {
@@ -242,7 +287,7 @@ pub fn scrape(
     }
 }
 
-fn print_content_list(content: Vec<Vec<&str>>, keys: Vec<&str>) {
+fn print_content_list(content: &Vec<Vec<&str>>, keys: Vec<&str>) {
     for chunk in content {
         for (i, data) in chunk.iter().enumerate() {
             let header = keys[i];
@@ -253,7 +298,7 @@ fn print_content_list(content: Vec<Vec<&str>>, keys: Vec<&str>) {
     }
 }
 
-fn print_content_table(content: Vec<Vec<&str>>, keys: Vec<&str>) {
+fn print_content_table(content: &Vec<Vec<&str>>, keys: Vec<&str>) {
     let table = content
         .table()
         .title(keys.iter().map(|k| k.cell().bold(true)))

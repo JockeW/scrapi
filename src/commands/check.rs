@@ -36,6 +36,11 @@ fn print_scrape_info(scrapes: Vec<Scrape>) {
         } else {
             "".to_string()
         };
+        let export = if let Some(export) = scrape.export {
+            export
+        } else {
+            "".to_string()
+        };
         println!("Name: {}", scrape.name);
         println!("Url: {}", scrape.url);
         println!("Selectors: {:?}", scrape.selectors);
@@ -45,6 +50,7 @@ fn print_scrape_info(scrapes: Vec<Scrape>) {
         println!("Suffixes: {:?}", suffixes);
         println!("Title: {:?}", title);
         println!("Present: {:?}", presentation);
+        println!("Export: {:?}", export);
 
         let selectors_full_command: String = scrape
             .selectors
@@ -107,10 +113,16 @@ fn print_scrape_info(scrapes: Vec<Scrape>) {
             "".to_string()
         };
 
+        let export_full_command: String = if !export.is_empty() {
+            format!(" --export \"{}\"", export)
+        } else {
+            "".to_string()
+        };
+
         println!(
             "Full command: {}",
             format!(
-                "scrape --url \"{}\" --selectors {} --keys {}{}{}{}{}{}",
+                "scrape --url \"{}\" --selectors {} --keys {}{}{}{}{}{}{}",
                 scrape.url,
                 selectors_full_command,
                 keys_full_command,
@@ -118,7 +130,8 @@ fn print_scrape_info(scrapes: Vec<Scrape>) {
                 prefixes_full_command,
                 suffixes_full_command,
                 title_full_command,
-                presentation_full_command
+                presentation_full_command,
+                export_full_command
             )
         );
         println!();

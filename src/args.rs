@@ -13,11 +13,12 @@ pub enum RScrapeCommand {
     /// Scrape a website and present the data
     Scrape(ScrapeCommand),
 
-    /// Check command, to check saved scrape and get all saved data presented nicely
+    /// Check saved scrape and it's configuration
     Check(CheckCommand),
 
     /// List the name of all saved scrapes
     List(ListCommand),
+
     /// Combine saved scrapes
     Combine(CombineCommand),
 
@@ -26,10 +27,11 @@ pub enum RScrapeCommand {
 
     // Scrape and inspect. Args for url, search and filter
     //Inspect(InspectCommand),
+
     /// Run saved scrape
     Run(RunCommand),
 
-    /// Delete saved scrape. OBS!! HANDLE SAVED COMBINED SCRAPES THAT MIGHT BE USING THIS SCRAPE
+    /// Delete saved scrape.
     Delete(DeleteCommand)
 }
 
@@ -61,6 +63,8 @@ pub struct ScrapeCommand {
     pub save: Option<String>,
     #[arg(long, required = false)]
     pub present: Option<Presentation>,
+    #[arg(short, long, required = false)]
+    pub export: Option<String>
 }
 
 #[derive(Debug, Args)]

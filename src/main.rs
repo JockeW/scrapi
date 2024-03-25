@@ -22,6 +22,7 @@ fn main() {
             cmd.title,
             cmd.save,
             cmd.present,
+            cmd.export
         ),
         args::RScrapeCommand::Check(cmd) => commands::check::check(cmd.name),
         args::RScrapeCommand::Run(cmd) => commands::run::run(cmd.name),
