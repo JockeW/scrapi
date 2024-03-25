@@ -225,7 +225,7 @@ pub fn scrape(
         None => (),
     }
 
-    if let Some(export) = export {
+    if let Some(export) = &export {
         let file_type = export.split('.').last().unwrap();
 
         match file_type {
@@ -279,6 +279,7 @@ pub fn scrape(
             match answer {
                 Ok(true) => save_scrape(
                     &save, &url, selectors, keys, attributes, prefixes, suffixes, title, present,
+                    export,
                 ),
                 Ok(false) => println!("Skipped saving"),
                 Err(_) => println!("Error with questionnaire, try again later"),
@@ -319,6 +320,7 @@ fn save_scrape(
     suffixes: Option<Vec<String>>,
     title: Option<String>,
     presentation: Option<Presentation>,
+    export: Option<String>,
 ) {
     println!("Saving scrape...");
     let mut file = OpenOptions::new()
@@ -378,9 +380,14 @@ fn save_scrape(
             None => "".to_string(),
         };
 
+        let export_to_write = match export {
+            Some(t) => t,
+            None => "".to_string(),
+        };
+
         writeln!(
             file,
-            "{};{};{:?};{:?};{:?};{:?};{:?};{};{}",
+            "{};{};{:?};{:?};{:?};{:?};{:?};{};{};{}",
             name,
             url,
             selectors,
@@ -389,7 +396,8 @@ fn save_scrape(
             prefixes_to_write,
             suffixes_to_write,
             title_to_write,
-            presentation_to_write
+            presentation_to_write,
+            export_to_write
         )
         .unwrap();
     }
