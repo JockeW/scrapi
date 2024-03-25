@@ -51,7 +51,7 @@ pub fn get_all_scrape_names() -> Vec<String> {
             scrape_names.push(
                 scrape
                     .split(';')
-                    .map(|s| format!("{} (combined)", s).clone())
+                    .map(|s| s.to_owned())
                     .collect::<Vec<String>>()[1]
                     .clone(),
             )

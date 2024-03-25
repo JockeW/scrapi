@@ -10,7 +10,7 @@ use inquire::Confirm;
 use scraper::{ElementRef, Html, Node, Selector};
 use serde_json::{json, to_writer};
 
-use crate::enums::Presentation;
+use crate::{enums::Presentation, utils::get_all_scrape_names};
 
 pub fn scrape(
     url: String,
@@ -330,26 +330,9 @@ fn save_scrape(
         .open("scrapes.txt")
         .unwrap();
 
-    let buff_reader = BufReader::new(&file);
+    let scrape_names: Vec<String> = get_all_scrape_names();
 
-    let mut lines: Vec<String> = Vec::new();
-    for line in buff_reader.lines() {
-        match line {
-            Ok(l) => lines.push(l),
-            Err(e) => println!("ERROR: {}", e),
-        }
-    }
-
-    let saved_scrapes: Vec<&str> = lines.iter().map(|l| l.as_str()).collect();
-
-    let scrape_names: Vec<&str> = saved_scrapes
-        .iter()
-        .map(|s| s.split(';').collect::<Vec<&str>>()[0])
-        .collect(); //TODO: Change scrape_names to contain names of combined scrapes instead of just "combined"
-
-    println!("SCRAPE NAMES: {:?}", scrape_names);
-
-    if scrape_names.contains(&name.to_lowercase().as_str()) {
+    if scrape_names.contains(&name.to_lowercase()) {
         println!("There is already a scrape with that name: '{}'", name);
         //TODO: Prompt user with options for overwrite, entering a new name, or cancel
     } else if name.to_lowercase() == "combined" {
@@ -399,6 +382,6 @@ fn save_scrape(
             presentation_to_write,
             export_to_write
         )
-        .unwrap();
+        .unwrap();//TODO: Return Result<> and show success or error message
     }
 }
