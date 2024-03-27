@@ -1400,6 +1400,7 @@ dependencies = [
  "clap",
  "cli-table",
  "colored",
+ "csv",
  "inquire",
  "reqwest",
  "scraper",

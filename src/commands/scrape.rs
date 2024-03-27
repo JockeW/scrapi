@@ -6,6 +6,7 @@ use std::{
 
 use cli_table::{Cell, Style, Table};
 use colored::Colorize;
+use csv::Writer;
 use inquire::Confirm;
 use scraper::{ElementRef, Html, Node, Selector};
 use serde_json::{json, to_writer};
@@ -259,7 +260,21 @@ pub fn scrape(
 
                 println!("JSON file created successfully.");
             }
-            "csv" => (),
+            "csv" => {
+                let file = File::create(export).unwrap();
+
+                let mut writer = Writer::from_writer(file);
+
+                writer.write_record(&keys).unwrap();
+
+                for record in all_content {
+                    writer.write_record(record).unwrap();
+                }
+
+                writer.flush().unwrap();
+
+                println!("CSV file created successfully.");
+            }
             _ => {
                 println!("The supported file types are '.json' and '.csv'");
                 return;
@@ -382,6 +397,6 @@ fn save_scrape(
             presentation_to_write,
             export_to_write
         )
-        .unwrap();//TODO: Return Result<> and show success or error message
+        .unwrap(); //TODO: Return Result<> and show success or error message
     }
 }
