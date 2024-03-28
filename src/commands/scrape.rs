@@ -229,14 +229,14 @@ pub fn scrape(
     if let Some(export) = &export {
         let file_type = export.split('.').last().unwrap();
 
+        let title_to_write = match &title {
+            Some(t) => t,
+            None => "",
+        };
+
         match file_type {
             "json" => {
                 let file = File::create(export).unwrap();
-
-                let title_to_write = match &title {
-                    Some(t) => t,
-                    None => "",
-                };
 
                 let mut results: Vec<HashMap<&String, &str>> = Vec::new();
 
