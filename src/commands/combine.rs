@@ -1,13 +1,21 @@
-use std::fs::OpenOptions;
+use std::fs::{File, OpenOptions};
 use std::io::{BufRead, BufReader, Write};
 
 pub fn combine(name: String, scrapes: Vec<String>) {
-    let mut file = OpenOptions::new()
+    let mut file: File;
+    let file_result = OpenOptions::new()
         .create(true)
         .append(true)
         .read(true)
-        .open("scrapes.txt")
-        .unwrap();
+        .open("scrapes.txt");
+
+    match file_result {
+        Ok(file_ok) => file = file_ok,
+        Err(err) => {
+            println!("Something went wrong when opening file. Error: {}", err);
+            return;
+        }
+    }
 
     let buff_reader = BufReader::new(&file);
 
@@ -54,6 +62,10 @@ pub fn combine(name: String, scrapes: Vec<String>) {
             }
         }
 
-        writeln!(file, "combined;{};{:?}", name, scrapes).unwrap();
+        let write_result = writeln!(file, "combined;{};{:?}", name, scrapes);
+        match write_result {
+            Ok(_) => println!("Combine successful"),
+            Err(err) => println!("Something went wrong when writing to file. Error: {}", err),
+        }
     }
 }

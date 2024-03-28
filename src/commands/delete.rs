@@ -8,7 +8,16 @@ use inquire::Confirm;
 use crate::utils::{get_combined_scrapes_for_scrape, get_scrape_name};
 
 pub fn delete(name: String) {
-    let file: File = OpenOptions::new().read(true).open("scrapes.txt").unwrap();
+    let mut file: File;
+    let file_result = OpenOptions::new().read(true).open("scrapes.txt");
+
+    match file_result {
+        Ok(file_ok) => file = file_ok,
+        Err(err) => {
+            println!("Something went wrong when opening file. Error: {}", err);
+            return;
+        }
+    }
 
     let reader = BufReader::new(&file);
 
@@ -17,7 +26,17 @@ pub fn delete(name: String) {
     let mut combined_scrapes_to_update: Vec<&str> = Vec::new();
 
     let result_lines: Lines<BufReader<&File>> = reader.lines();
-    let lines = result_lines.map(|x| x.unwrap()).collect::<Vec<String>>();
+    let mut lines: Vec<String> = Vec::new();
+    for line_result in result_lines {
+        match line_result {
+            Ok(line) => lines.push(line),
+            Err(err) => {
+                println!("Something went wrong. Error: {}", err);
+                return;
+            }
+        }
+    }
+
     for line in lines.iter() {
         let line_parts = line.split(';').collect::<Vec<&str>>();
 
@@ -72,21 +91,39 @@ pub fn delete(name: String) {
         lines_to_write.push(line);
     }
 
-    File::create("scrapes.txt.temp").unwrap();
+    let file_result = File::create("scrapes.txt.temp");
+    if let Err(err) = file_result {
+        println!("Something went wrong. Error: {}", err);
+        return;
+    }
 
-    let mut out_file: File = OpenOptions::new()
-        .write(true)
-        .open("scrapes.txt.temp")
-        .unwrap();
+    let mut out_file: File;
+    let out_file_result = OpenOptions::new().write(true).open("scrapes.txt.temp");
+
+    match out_file_result {
+        Ok(file) => out_file = file,
+        Err(err) => {
+            println!("Something went wrong. Error: {}", err);
+            return;
+        }
+    }
 
     for line in lines_to_write {
-        writeln!(out_file, "{}", line).unwrap();
+        let write_result = writeln!(out_file, "{}", line);
+        if let Err(err) = write_result {
+            println!("Something went wrong. Error: {}", err);
+            return;
+        }
     }
 
     drop(file);
     drop(out_file);
 
-    fs::rename("scrapes.txt.temp", "scrapes.txt").unwrap();
+    let rename_result = fs::rename("scrapes.txt.temp", "scrapes.txt");
+    if let Err(err) = rename_result {
+        println!("Something went wrong. Error: {}", err);
+        return;
+    }
 
     println!("Scrape '{}' has been deleted", name);
 }
