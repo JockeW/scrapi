@@ -1,7 +1,7 @@
 use std::{
     collections::HashMap,
     fs::{File, OpenOptions},
-    io::{BufRead, BufReader, Write},
+    io::{BufRead, BufReader, Error, Write},
 };
 
 use cli_table::{Cell, Style, Table};
@@ -350,12 +350,19 @@ pub fn scrape(
                 .prompt();
 
             match answer {
-                Ok(true) => save_scrape(
-                    &save, &url, selectors, keys, attributes, prefixes, suffixes, title, present,
-                    export,
-                ),
+                Ok(true) => {
+                    let save_result = save_scrape(
+                        &save, &url, selectors, keys, attributes, prefixes, suffixes, title,
+                        present, export,
+                    );
+
+                    match save_result {
+                        Ok(()) => println!("Scraoe saved successfully!"),
+                        Err(err) => println!("Error: {}", err),
+                    }
+                }
                 Ok(false) => println!("Skipped saving"),
-                Err(_) => println!("Error with questionnaire, try again later"),
+                Err(err) => println!("Error with questionnaire. Error: {}", err),
             }
         }
     }
@@ -396,22 +403,36 @@ fn save_scrape(
     title: Option<String>,
     presentation: Option<Presentation>,
     export: Option<String>,
-) {
+) -> Result<(), Error> {
     println!("Saving scrape...");
-    let mut file = OpenOptions::new()
+
+    let mut file: File;
+    let file_result = OpenOptions::new()
         .create(true)
         .append(true)
         .read(true)
-        .open("scrapes.txt")
-        .unwrap();
+        .open("scrapes.txt");
+
+    match file_result {
+        Ok(file_ok) => file = file_ok,
+        Err(err) => {
+            println!("Something went wrong when opening file.");
+            return Result::Err(err);
+        }
+    }
 
     let scrape_names: Vec<String> = get_all_scrape_names();
 
     if scrape_names.contains(&name.to_lowercase()) {
         println!("There is already a scrape with that name: '{}'", name);
+        return Result::Err(Error::new(std::io::ErrorKind::Other, "Name already taken"));
         //TODO: Prompt user with options for overwrite, entering a new name, or cancel
     } else if name.to_lowercase() == "combined" {
         println!("'combined' is a reserved word");
+        return Result::Err(Error::new(
+            std::io::ErrorKind::Other,
+            "'combined' is a reserved word",
+        ));
     } else {
         let title_to_write = match title {
             Some(t) => t,
@@ -443,7 +464,7 @@ fn save_scrape(
             None => "".to_string(),
         };
 
-        writeln!(
+        let write_result = writeln!(
             file,
             "{};{};{:?};{:?};{:?};{:?};{:?};{};{};{}",
             name,
@@ -456,7 +477,8 @@ fn save_scrape(
             title_to_write,
             presentation_to_write,
             export_to_write
-        )
-        .unwrap(); //TODO: Return Result<> and show success or error message
+        );
+
+        write_result
     }
 }

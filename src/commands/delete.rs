@@ -8,7 +8,7 @@ use inquire::Confirm;
 use crate::utils::{get_combined_scrapes_for_scrape, get_scrape_name};
 
 pub fn delete(name: String) {
-    let mut file: File;
+    let file: File;
     let file_result = OpenOptions::new().read(true).open("scrapes.txt");
 
     match file_result {
