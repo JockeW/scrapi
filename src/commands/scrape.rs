@@ -104,9 +104,27 @@ pub fn scrape(
         }
     }
 
-    let html = reqwest::blocking::get(&url).unwrap().text().unwrap();
+    let mut html: String = String::new();
+    let html_result = reqwest::blocking::get(&url);
+    match html_result {
+        Ok(html_response) => {
+            let html_text_result = html_response.text();
+            match html_text_result {
+                Ok(text) => html = text,
+                Err(err) => {
+                    println!("Failed getting data. Error: {}", err);
+                    return;
+                }
+            }
+        }
+        Err(err) => {
+            println!("Failed getting data. Error: {}", err);
+            return;
+        }
+    }
+
     let document = Html::parse_document(&html);
-    //println!("{}", document.html());//TODO: Some message if response html is only a captcha. Or does it work with WebDriver? For example Ticketmaster site.
+    //println!("{}", document.html()); //TODO: Some message if response html is only a captcha.
 
     let mut contents: Vec<Vec<String>> = Vec::new();
 
@@ -227,7 +245,14 @@ pub fn scrape(
     }
 
     if let Some(export) = &export {
-        let file_type = export.split('.').last().unwrap();
+        let file_type: &str;
+        let file_type_opt = export.split('.').last();
+        if let Some(type_of_file) = file_type_opt {
+            file_type = type_of_file;
+        } else {
+            println!("File type missing for export file");
+            return;
+        }
 
         let title_to_write = match &title {
             Some(t) => t,
@@ -236,7 +261,15 @@ pub fn scrape(
 
         match file_type {
             "json" => {
-                let file = File::create(export).unwrap();
+                let file: File;
+                let file_result = File::create(export);
+                match file_result {
+                    Ok(f) => file = f,
+                    Err(err) => {
+                        println!("Failed to create export file. Error: {}", err);
+                        return;
+                    }
+                }
 
                 let mut results: Vec<HashMap<&String, &str>> = Vec::new();
 
@@ -256,22 +289,47 @@ pub fn scrape(
                     "results": results
                 });
 
-                to_writer(&file, &data).unwrap();
-
-                println!("JSON file created successfully.");
+                let json_result = to_writer(&file, &data);
+                match json_result {
+                    Ok(()) => println!("JSON file created successfully."),
+                    Err(err) => {
+                        println!("Failed to create export file. Error: {}", err);
+                        return;
+                    }
+                }
             }
             "csv" => {
-                let file = File::create(export).unwrap();
+                let file: File;
+                let file_result = File::create(export);
+                match file_result {
+                    Ok(f) => file = f,
+                    Err(err) => {
+                        println!("Failed to create export file. Error: {}", err);
+                        return;
+                    }
+                }
 
                 let mut writer = Writer::from_writer(file);
 
-                writer.write_record(&keys).unwrap();
+                let mut write_results = Vec::new();
+                let mut write_record_result = writer.write_record(&keys);
+                write_results.push(write_record_result);
 
                 for record in all_content {
-                    writer.write_record(record).unwrap();
+                    write_record_result = writer.write_record(record);
+                    write_results.push(write_record_result);
                 }
 
-                writer.flush().unwrap();
+                if write_results.iter().any(|result| result.is_err()) {
+                    println!("Failed to create export file");
+                    return;
+                }
+
+                let flush_result = writer.flush();
+                if flush_result.is_err() {
+                    println!("Failed to create export file");
+                    return;
+                }
 
                 println!("CSV file created successfully.");
             }
@@ -320,9 +378,11 @@ fn print_content_table(content: &Vec<Vec<&str>>, keys: Vec<&str>) {
         .title(keys.iter().map(|k| k.cell().bold(true)))
         .bold(true);
 
-    let table_display = table.display().unwrap();
-
-    println!("{}", table_display);
+    let table_display_result = table.display();
+    match table_display_result {
+        Ok(table_display) => println!("{}", table_display),
+        Err(err) => println!("Failed printing data in table. Error: {}", err),
+    }
 }
 
 fn save_scrape(
