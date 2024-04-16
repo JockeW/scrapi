@@ -63,7 +63,7 @@ pub struct ScrapeCommand {
     pub save: Option<String>,
     #[arg(long, required = false)]
     pub present: Option<Presentation>,
-    #[arg(short, long, required = false)]
+    #[arg(short, long, required = false, help = "Supported file types: .json, .csv")]
     pub export: Option<String>
 }
 
