@@ -146,7 +146,7 @@ fn handle_combined(
             .replace("]", "")
             .replace("\"", "")
             .split(',')
-            .map(|s| s.trim().replace(",", ""))
+            .map(|s| s.trim().replace(',', ""))
             .collect::<Vec<String>>();
 
         let mut new_combined_scrapes = Vec::new();
