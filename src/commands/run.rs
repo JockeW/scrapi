@@ -16,7 +16,7 @@ pub fn run(name: String) {
                     scrape.title,
                     None,
                     scrape.presentation,
-                    scrape.export
+                    scrape.export,
                 );
             }
         }

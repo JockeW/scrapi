@@ -27,12 +27,11 @@ pub enum RScrapeCommand {
 
     // Scrape and inspect. Args for url, search and filter
     //Inspect(InspectCommand),
-
     /// Run saved scrape
     Run(RunCommand),
 
     /// Delete saved scrape.
-    Delete(DeleteCommand)
+    Delete(DeleteCommand),
 }
 
 #[derive(Debug, Args)]
@@ -63,8 +62,13 @@ pub struct ScrapeCommand {
     pub save: Option<String>,
     #[arg(long, required = false)]
     pub present: Option<Presentation>,
-    #[arg(short, long, required = false, help = "Supported file types: .json, .csv")]
-    pub export: Option<String>
+    #[arg(
+        short,
+        long,
+        required = false,
+        help = "Supported file types: .json, .csv"
+    )]
+    pub export: Option<String>,
 }
 
 #[derive(Debug, Args)]

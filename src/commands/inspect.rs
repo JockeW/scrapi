@@ -1,4 +1,4 @@
-use scraper::{Html, Selector, ElementRef};
+use scraper::{ElementRef, Html, Selector};
 
 pub fn inspect(url: String, filter: Option<String>, search: Option<String>) {
     // let html = reqwest::blocking::get(&url).unwrap().text().unwrap();
@@ -8,5 +8,4 @@ pub fn inspect(url: String, filter: Option<String>, search: Option<String>) {
     //     let selector = Selector::parse(&s).expect("Not a valid selector");
     //     let element_ref: Vec<ElementRef> = document.select(&selector).collect();
     // }
-    
 }

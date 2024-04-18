@@ -11,10 +11,10 @@ pub struct Scrape {
     pub suffixes: Option<Vec<String>>,
     pub title: Option<String>,
     pub presentation: Option<Presentation>,
-    pub export: Option<String>
+    pub export: Option<String>,
 }
 
 pub struct CombinedScrape {
     pub name: String,
-    pub scrapes: Vec<Scrape>
+    pub scrapes: Vec<Scrape>,
 }
