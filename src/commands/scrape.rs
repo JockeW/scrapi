@@ -1,7 +1,7 @@
 use std::{
     collections::HashMap,
     fs::{File, OpenOptions},
-    io::{BufRead, BufReader, Error, Write},
+    io::{Error, Write},
 };
 
 use cli_table::{Cell, Style, Table};
@@ -104,7 +104,7 @@ pub fn scrape(
         }
     }
 
-    let mut html: String = String::new();
+    let html: String;
     let html_result = reqwest::blocking::get(&url);
     match html_result {
         Ok(html_response) => {

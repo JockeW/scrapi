@@ -14,7 +14,7 @@ pub struct Scrape {
     pub export: Option<String>,
 }
 
-pub struct CombinedScrape {
-    pub name: String,
-    pub scrapes: Vec<Scrape>,
-}
+// pub struct CombinedScrape {
+//     pub name: String,
+//     pub scrapes: Vec<Scrape>,
+// }

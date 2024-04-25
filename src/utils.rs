@@ -1,6 +1,6 @@
 use crate::{
     enums::Presentation,
-    structs::{CombinedScrape, Scrape},
+    structs::Scrape,
 };
 
 pub fn get_scrape_name(scrape: &str) -> &str {
@@ -69,43 +69,43 @@ pub fn get_all_scrape_names() -> Vec<String> {
     return scrape_names;
 }
 
-pub fn get_saved_scrapes(include_combined: bool) -> (Vec<Scrape>, Vec<CombinedScrape>) {
-    let mut scrapes = Vec::new();
-    let mut combined_scrapes = Vec::new();
+// pub fn get_saved_scrapes(include_combined: bool) -> (Vec<Scrape>, Vec<CombinedScrape>) {
+//     let mut scrapes = Vec::new();
+//     let mut combined_scrapes = Vec::new();
 
-    let file_content = include_str!("../scrapes.txt");
+//     let file_content = include_str!("../scrapes.txt");
 
-    let lines: Vec<&str> = file_content.trim().split('\n').collect();
-    let saved_scrapes: Vec<&str> = lines.iter().map(|l| l.trim()).collect();
+//     let lines: Vec<&str> = file_content.trim().split('\n').collect();
+//     let saved_scrapes: Vec<&str> = lines.iter().map(|l| l.trim()).collect();
 
-    for scrape_str in saved_scrapes {
-        let scrape_parts: Vec<&str> = scrape_str.split(';').map(|x| x.trim()).collect();
+//     for scrape_str in saved_scrapes {
+//         let scrape_parts: Vec<&str> = scrape_str.split(';').map(|x| x.trim()).collect();
 
-        if include_combined && scrape_parts[0] == "combined" {
-            let name = scrape_parts[1];
-            let scrapes_in_combined = scrape_parts[2]
-                .replace("[", "")
-                .replace("]", "")
-                .replace("\"", "")
-                .split(',')
-                .map(|s| s.trim().replace(",", ""))
-                .map(|s| get_scrape_from_str(&s))
-                .collect::<Vec<Scrape>>();
+//         if include_combined && scrape_parts[0] == "combined" {
+//             let name = scrape_parts[1];
+//             let scrapes_in_combined = scrape_parts[2]
+//                 .replace("[", "")
+//                 .replace("]", "")
+//                 .replace("\"", "")
+//                 .split(',')
+//                 .map(|s| s.trim().replace(",", ""))
+//                 .map(|s| get_scrape_from_str(&s))
+//                 .collect::<Vec<Scrape>>();
 
-            let combined_scrape = CombinedScrape {
-                name: name.to_string(),
-                scrapes: scrapes_in_combined,
-            };
+//             let combined_scrape = CombinedScrape {
+//                 name: name.to_string(),
+//                 scrapes: scrapes_in_combined,
+//             };
 
-            combined_scrapes.push(combined_scrape);
-        } else if scrape_parts[0] != "combined" {
-            let scrape = get_scrape_from_str(scrape_str);
-            scrapes.push(scrape);
-        }
-    }
+//             combined_scrapes.push(combined_scrape);
+//         } else if scrape_parts[0] != "combined" {
+//             let scrape = get_scrape_from_str(scrape_str);
+//             scrapes.push(scrape);
+//         }
+//     }
 
-    (scrapes, combined_scrapes)
-}
+//     (scrapes, combined_scrapes)
+// }
 
 pub fn get_saved_scrape(name: &str) -> Option<Vec<Scrape>> {
     let file_content = include_str!("../scrapes.txt");
