@@ -66,7 +66,7 @@ fn print_scrape_info(scrapes: Vec<Scrape>) {
             .reduce(|acc, e| acc + " " + &e)
             .unwrap();
 
-        let attributes_full_command = if attributes.len() > 0 {
+        let attributes_full_command = if !attributes.is_empty() {
             let attributes_string = attributes
                 .iter()
                 .map(|s| format!("\"{}\"", s))
@@ -78,7 +78,7 @@ fn print_scrape_info(scrapes: Vec<Scrape>) {
             "".to_string()
         };
 
-        let prefixes_full_command = if prefixes.len() > 0 {
+        let prefixes_full_command = if !prefixes.is_empty() {
             let prefixes_string = prefixes
                 .iter()
                 .map(|s| format!("\"{}\"", s))
@@ -89,7 +89,7 @@ fn print_scrape_info(scrapes: Vec<Scrape>) {
             "".to_string()
         };
 
-        let suffixes_full_command = if suffixes.len() > 0 {
+        let suffixes_full_command = if !suffixes.is_empty() {
             let suffixes_string = suffixes
                 .iter()
                 .map(|s| format!("\"{}\"", s))
@@ -120,19 +120,16 @@ fn print_scrape_info(scrapes: Vec<Scrape>) {
         };
 
         println!(
-            "Full command: {}",
-            format!(
-                "scrape --url \"{}\" --selectors {} --keys {}{}{}{}{}{}{}",
-                scrape.url,
-                selectors_full_command,
-                keys_full_command,
-                attributes_full_command,
-                prefixes_full_command,
-                suffixes_full_command,
-                title_full_command,
-                presentation_full_command,
-                export_full_command
-            )
+            "Full command: scrape --url \"{}\" --selectors {} --keys {}{}{}{}{}{}{}",
+            scrape.url,
+            selectors_full_command,
+            keys_full_command,
+            attributes_full_command,
+            prefixes_full_command,
+            suffixes_full_command,
+            title_full_command,
+            presentation_full_command,
+            export_full_command
         );
         println!();
     }

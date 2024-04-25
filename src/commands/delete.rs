@@ -44,7 +44,7 @@ pub fn delete(name: String) {
 
         let scrape_name = get_scrape_name(line);
 
-        if scrape_name == &name {
+        if scrape_name == name {
             scrape_found = true;
 
             if !is_combined {
@@ -63,7 +63,7 @@ pub fn delete(name: String) {
     let mut lines_to_write: Vec<&String> = Vec::new();
     let mut updated_combined_scrapes: Vec<String> = Vec::new();
 
-    if combined_scrapes_to_update.len() > 0 {
+    if !combined_scrapes_to_update.is_empty() {
         let update_combined_option = handle_combined(combined_scrapes_to_update, &name);
 
         match update_combined_option {
@@ -82,8 +82,7 @@ pub fn delete(name: String) {
         let scrape_name = get_scrape_name(line);
         let exists = lines_to_write
             .iter()
-            .find(|&&x| get_scrape_name(x) == scrape_name)
-            .is_some();
+            .any(|&x| get_scrape_name(x) == scrape_name);
 
         if exists {
             continue;
@@ -183,7 +182,7 @@ fn handle_combined(
         }
         Err(_) => {
             println!("Error with questionnaire, try again later");
-            return None;
+            None
         }
     }
 }
