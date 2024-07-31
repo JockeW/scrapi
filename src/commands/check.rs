@@ -11,36 +11,16 @@ pub fn check(name: String) {
 
 fn print_scrape_info(scrapes: Vec<Scrape>) {
     for scrape in scrapes {
-        let attributes = if let Some(attributes) = scrape.attributes {
-            attributes
-        } else {
-            Vec::new()
-        };
-        let prefixes = if let Some(prefixes) = scrape.prefixes {
-            prefixes
-        } else {
-            Vec::new()
-        };
-        let suffixes = if let Some(suffixes) = scrape.suffixes {
-            suffixes
-        } else {
-            Vec::new()
-        };
-        let title = if let Some(title) = scrape.title {
-            title
-        } else {
-            "".to_string()
-        };
+        let attributes = scrape.attributes.unwrap_or_default();
+        let prefixes = scrape.prefixes.unwrap_or_default();
+        let suffixes = scrape.suffixes.unwrap_or_default();
+        let title = scrape.title.unwrap_or_default();
         let presentation = if let Some(presentation) = scrape.presentation {
             presentation.to_string()
         } else {
             "".to_string()
         };
-        let export = if let Some(export) = scrape.export {
-            export
-        } else {
-            "".to_string()
-        };
+        let export = scrape.export.unwrap_or_default();
         println!("Name: {}", scrape.name);
         println!("Url: {}", scrape.url);
         println!("Selectors: {:?}", scrape.selectors);

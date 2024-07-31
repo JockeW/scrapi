@@ -360,7 +360,7 @@ pub fn scrape(
                     );
 
                     match save_result {
-                        Ok(()) => println!("Scraoe saved successfully!"),
+                        Ok(()) => println!("Scrape saved successfully!"),
                         Err(err) => println!("Error: {}", err),
                     }
                 }
@@ -438,35 +438,20 @@ fn save_scrape(
             "'combined' is a reserved word",
         ));
     } else {
-        let title_to_write = match title {
-            Some(t) => t,
-            None => "".to_string(),
-        };
+        let title_to_write = title.unwrap_or_default();
 
-        let attributes_to_write = match attributes {
-            Some(t) => t,
-            None => Vec::new(),
-        };
+        let attributes_to_write = attributes.unwrap_or_default();
 
-        let prefixes_to_write = match prefixes {
-            Some(t) => t,
-            None => Vec::new(),
-        };
+        let prefixes_to_write = prefixes.unwrap_or_default();
 
-        let suffixes_to_write = match suffixes {
-            Some(t) => t,
-            None => Vec::new(),
-        };
+        let suffixes_to_write = suffixes.unwrap_or_default();
 
         let presentation_to_write = match presentation {
             Some(p) => p.to_string().to_lowercase(),
             None => "".to_string(),
         };
 
-        let export_to_write = match export {
-            Some(t) => t,
-            None => "".to_string(),
-        };
+        let export_to_write = export.unwrap_or_default();
 
         let write_result = writeln!(
             file,
