@@ -13,6 +13,7 @@ use serde_json::{json, to_writer};
 
 use crate::{enums::Presentation, utils::get_all_scrape_names};
 
+#[allow(clippy::too_many_arguments)]
 pub fn scrape(
     url: String,
     selectors: Vec<String>,
@@ -37,7 +38,7 @@ pub fn scrape(
 
     if let Some(attributes) = attributes.as_ref() {
         for attr in attributes {
-            let attr_parts: Vec<&str> = attr.split(":").collect();
+            let attr_parts: Vec<&str> = attr.split(':').collect();
             if attr_parts.len() != 2 {
                 println!("{}: Invalid attribute", "error".bold().color("red"));
                 return;
@@ -64,7 +65,7 @@ pub fn scrape(
 
     if let Some(prefixes) = prefixes.as_ref() {
         for prefix in prefixes {
-            let prefix_parts = prefix.split_once(":").expect("Invalid prefix");
+            let prefix_parts = prefix.split_once(':').expect("Invalid prefix");
 
             let selector_index: usize = prefix_parts
                 .0
@@ -86,7 +87,7 @@ pub fn scrape(
 
     if let Some(suffixes) = suffixes.as_ref() {
         for suffix in suffixes {
-            let suffix_parts = suffix.split_once(":").expect("Invalid suffix");
+            let suffix_parts = suffix.split_once(':').expect("Invalid suffix");
 
             let selector_index: usize = suffix_parts
                 .0
@@ -129,10 +130,10 @@ pub fn scrape(
     let mut contents: Vec<Vec<String>> = Vec::new();
 
     for (index, s) in selectors.iter().enumerate() {
-        let selector = Selector::parse(&s).expect("Not a valid selector");
+        let selector = Selector::parse(s).expect("Not a valid selector");
         let element_ref: Vec<ElementRef> = document.select(&selector).collect();
 
-        if element_ref.len() > 0 {
+        if !element_ref.is_empty() {
             let mut content_vec: Vec<String> = Vec::new();
 
             for element in element_ref {
@@ -141,13 +142,13 @@ pub fn scrape(
                 // If there is an attribute specified for current selector, get the value of that attribute
                 // instead of checking element.children
 
-                if parsed_attributes.len() > 0 {
+                if !parsed_attributes.is_empty() {
                     let attributes = parsed_attributes
                         .iter()
                         .filter(|&a| a.0 == index)
                         .collect::<Vec<&(usize, &str)>>();
 
-                    if attributes.len() > 0 {
+                    if !attributes.is_empty() {
                         let attribute_value = element
                             .value()
                             .attr(attributes.first().unwrap().1)
@@ -180,23 +181,23 @@ pub fn scrape(
                 }
 
                 //Add prefix and suffix
-                if parsed_prefixes.len() > 0 {
+                if !parsed_prefixes.is_empty() {
                     let prefixes = parsed_prefixes
                         .iter()
                         .filter(|&a| a.0 == index)
                         .collect::<Vec<&(usize, &str)>>();
 
-                    if prefixes.len() > 0 {
+                    if !prefixes.is_empty() {
                         full_text = format!("{}{}", prefixes.first().unwrap().1, full_text);
                     }
                 }
-                if parsed_suffixes.len() > 0 {
+                if !parsed_suffixes.is_empty() {
                     let suffixes = parsed_suffixes
                         .iter()
                         .filter(|&a| a.0 == index)
                         .collect::<Vec<&(usize, &str)>>();
 
-                    if suffixes.len() > 0 {
+                    if !suffixes.is_empty() {
                         full_text = format!("{}{}", full_text, suffixes.first().unwrap().1);
                     }
                 }
@@ -211,7 +212,7 @@ pub fn scrape(
         }
     }
 
-    if contents.len() == 0 {
+    if contents.is_empty() {
         return;
     }
 
@@ -394,6 +395,7 @@ fn print_content_table(content: &Vec<Vec<&str>>, keys: Vec<&str>) {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn save_scrape(
     name: &str,
     url: &str,
@@ -427,7 +429,7 @@ fn save_scrape(
 
     if scrape_names.contains(&name.to_lowercase()) {
         println!("There is already a scrape with that name: '{}'", name);
-        return Result::Err(Error::new(std::io::ErrorKind::Other, "Name already taken"));
+        Result::Err(Error::new(std::io::ErrorKind::Other, "Name already taken"))
         //TODO: Prompt user with options for overwrite, entering a new name, or cancel
     } else if name.to_lowercase() == "combined" {
         println!("'combined' is a reserved word");

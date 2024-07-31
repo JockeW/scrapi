@@ -21,9 +21,7 @@ pub fn get_combined_scrapes_for_scrape(scrape_name: &String) -> Vec<&'static str
         .filter(|&l| {
             l.split(';').collect::<Vec<&str>>()[0] == "combined"
                 && l.split(';').collect::<Vec<&str>>()[2]
-                    .replace('[', "")
-                    .replace(']', "")
-                    .replace('\"', "")
+                    .replace(['[', ']', '\"'], "")
                     .split(',')
                     .map(|s| s.trim().replace(',', ""))
                     .collect::<Vec<String>>()
@@ -123,9 +121,7 @@ pub fn get_saved_scrape(name: &str) -> Option<Vec<Scrape>> {
 
         if scrape.split(';').collect::<Vec<&str>>()[0] == "combined" {
             let scrapes_in_combined = scrape.split(';').collect::<Vec<&str>>()[2]
-                .replace('[', "")
-                .replace(']', "")
-                .replace('\"', "")
+                .replace(['[', ']', '\"'], "")
                 .split(',')
                 .map(|s| s.trim().replace(',', "").to_string())
                 .collect::<Vec<String>>();

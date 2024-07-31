@@ -133,7 +133,7 @@ fn handle_combined(
 ) -> Option<Vec<String>> {
     let mut updated_combined_scrapes: Vec<String> = Vec::new();
 
-    let mut message = format!("The following combined scrapes are using this scrape: ");
+    let mut message = "The following combined scrapes are using this scrape: ".to_string();
 
     for combined in combined_scrapes_using_deleted_scrape {
         let combined_scrape_parts = combined.split(';').collect::<Vec<&str>>();
@@ -141,9 +141,7 @@ fn handle_combined(
         message = format!("{}\n{}", message, combined_scrape_parts[1]);
 
         let combined_scrapes = combined_scrape_parts[2]
-            .replace("[", "")
-            .replace("]", "")
-            .replace("\"", "")
+            .replace(['[', ']', '\"'], "")
             .split(',')
             .map(|s| s.trim().replace(',', ""))
             .collect::<Vec<String>>();
