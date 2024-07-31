@@ -244,6 +244,8 @@ pub fn scrape(
         None => (),
     }
 
+    println!("Number of results: {}", all_content.len());
+
     if let Some(export) = &export {
         let file_type: &str;
         let file_type_opt = export.split('.').last();
