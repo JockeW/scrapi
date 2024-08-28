@@ -1,4 +1,7 @@
-use std::{fs::{File, OpenOptions}, io::{BufRead, BufReader}, process};
+use std::{
+    fs::{File, OpenOptions},
+    io::{BufRead, BufReader},
+};
 
 use crate::{enums::Presentation, structs::Scrape};
 
@@ -13,30 +16,6 @@ pub fn get_scrape_name(scrape: &str) -> &str {
 }
 
 pub fn get_combined_scrapes_for_scrape(scrape_name: &String) -> Vec<String> {
-    // let file: File;
-    // let file_result = OpenOptions::new().read(true).open("scrapes.txt");
-
-    // match file_result {
-    //     Ok(file_ok) => file = file_ok,
-    //     Err(err) => {
-    //         panic!("The file could not be opened. Error: {}", err);
-    //     }
-    // }
-
-    // let buff_reader = BufReader::new(&file);
-
-    // let mut lines: Vec<&str> = Vec::new();
-    // for line in buff_reader.lines() {
-    //     match line {
-    //         Ok(l) => lines.push(&l),
-    //         Err(e) => println!("ERROR: {}", e),
-    //     }
-    // }
-
-   // let file_content = include_str!("../scrapes.txt");
-
-    //let lines: Vec<&str> = file_content.trim().split('\n').collect();
-
     let lines = get_file_lines();
 
     let saved_scrapes: Vec<&str> = lines.iter().map(|l| l.trim()).collect();
@@ -58,30 +37,6 @@ pub fn get_combined_scrapes_for_scrape(scrape_name: &String) -> Vec<String> {
 }
 
 pub fn get_all_scrape_names() -> Vec<String> {
-    // let file: File;
-    // let file_result = OpenOptions::new().read(true).open("scrapes.txt");
-
-    // match file_result {
-    //     Ok(file_ok) => file = file_ok,
-    //     Err(err) => {
-    //         panic!("The file could not be opened. Error: {}", err);
-    //     }
-    // }
-
-    // let buff_reader = BufReader::new(&file);
-
-    // let mut lines: Vec<&str> = Vec::new();
-    // for line in buff_reader.lines() {
-    //     match line {
-    //         Ok(l) => lines.push(&l),
-    //         Err(e) => println!("ERROR: {}", e),
-    //     }
-    // }
-
-    //let file_content = include_str!("../scrapes.txt");
-
-    //let lines: Vec<&str> = file_content.trim().split('\n').collect();
-
     let lines = get_file_lines();
 
     let saved_scrapes: Vec<&str> = lines.iter().map(|l| l.trim()).collect();
@@ -111,49 +66,7 @@ pub fn get_all_scrape_names() -> Vec<String> {
     scrape_names
 }
 
-// pub fn get_saved_scrapes(include_combined: bool) -> (Vec<Scrape>, Vec<CombinedScrape>) {
-//     let mut scrapes = Vec::new();
-//     let mut combined_scrapes = Vec::new();
-
-//     let file_content = include_str!("../scrapes.txt");
-
-//     let lines: Vec<&str> = file_content.trim().split('\n').collect();
-//     let saved_scrapes: Vec<&str> = lines.iter().map(|l| l.trim()).collect();
-
-//     for scrape_str in saved_scrapes {
-//         let scrape_parts: Vec<&str> = scrape_str.split(';').map(|x| x.trim()).collect();
-
-//         if include_combined && scrape_parts[0] == "combined" {
-//             let name = scrape_parts[1];
-//             let scrapes_in_combined = scrape_parts[2]
-//                 .replace("[", "")
-//                 .replace("]", "")
-//                 .replace("\"", "")
-//                 .split(',')
-//                 .map(|s| s.trim().replace(",", ""))
-//                 .map(|s| get_scrape_from_str(&s))
-//                 .collect::<Vec<Scrape>>();
-
-//             let combined_scrape = CombinedScrape {
-//                 name: name.to_string(),
-//                 scrapes: scrapes_in_combined,
-//             };
-
-//             combined_scrapes.push(combined_scrape);
-//         } else if scrape_parts[0] != "combined" {
-//             let scrape = get_scrape_from_str(scrape_str);
-//             scrapes.push(scrape);
-//         }
-//     }
-
-//     (scrapes, combined_scrapes)
-// }
-
 pub fn get_saved_scrape(name: &str) -> Option<Vec<Scrape>> {
-    //let file_content = include_str!("../scrapes.txt");
-
-    //let lines: Vec<&str> = file_content.trim().split('\n').collect();
-
     let lines = get_file_lines();
 
     let saved_scrape = lines
@@ -294,12 +207,12 @@ fn get_scrape_from_str(data_str: &str) -> Scrape {
 
 fn get_file_lines() -> Vec<String> {
     let file: File;
-    let file_result = OpenOptions::new().read(true).open("scrapes.txt");
+    let file_result = OpenOptions::new().read(true).open("/.data/scrapes.txt");
 
     match file_result {
         Ok(file_ok) => file = file_ok,
         Err(_err) => {
-            println!("There are no saved scrapes");
+            println!("The scrapes file does not exist. {}", _err);
             return Vec::new();
         }
     }
