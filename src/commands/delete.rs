@@ -23,7 +23,7 @@ pub fn delete(name: String) {
 
     let mut scrape_found = false;
     let mut lines_not_to_delete = Vec::new();
-    let mut combined_scrapes_to_update: Vec<&str> = Vec::new();
+    let mut combined_scrapes_to_update: Vec<String> = Vec::new();
 
     let result_lines: Lines<BufReader<&File>> = reader.lines();
     let mut lines: Vec<String> = Vec::new();
@@ -128,7 +128,7 @@ pub fn delete(name: String) {
 }
 
 fn handle_combined(
-    combined_scrapes_using_deleted_scrape: Vec<&str>,
+    combined_scrapes_using_deleted_scrape: Vec<String>,
     name: &str,
 ) -> Option<Vec<String>> {
     let mut updated_combined_scrapes: Vec<String> = Vec::new();

@@ -1,3 +1,5 @@
+use std::{fs::{File, OpenOptions}, io::{BufRead, BufReader}, process};
+
 use crate::{enums::Presentation, structs::Scrape};
 
 pub fn get_scrape_name(scrape: &str) -> &str {
@@ -10,10 +12,33 @@ pub fn get_scrape_name(scrape: &str) -> &str {
     }
 }
 
-pub fn get_combined_scrapes_for_scrape(scrape_name: &String) -> Vec<&'static str> {
-    let file_content = include_str!("../scrapes.txt");
+pub fn get_combined_scrapes_for_scrape(scrape_name: &String) -> Vec<String> {
+    // let file: File;
+    // let file_result = OpenOptions::new().read(true).open("scrapes.txt");
 
-    let lines: Vec<&str> = file_content.trim().split('\n').collect();
+    // match file_result {
+    //     Ok(file_ok) => file = file_ok,
+    //     Err(err) => {
+    //         panic!("The file could not be opened. Error: {}", err);
+    //     }
+    // }
+
+    // let buff_reader = BufReader::new(&file);
+
+    // let mut lines: Vec<&str> = Vec::new();
+    // for line in buff_reader.lines() {
+    //     match line {
+    //         Ok(l) => lines.push(&l),
+    //         Err(e) => println!("ERROR: {}", e),
+    //     }
+    // }
+
+   // let file_content = include_str!("../scrapes.txt");
+
+    //let lines: Vec<&str> = file_content.trim().split('\n').collect();
+
+    let lines = get_file_lines();
+
     let saved_scrapes: Vec<&str> = lines.iter().map(|l| l.trim()).collect();
 
     return saved_scrapes
@@ -27,14 +52,38 @@ pub fn get_combined_scrapes_for_scrape(scrape_name: &String) -> Vec<&'static str
                     .collect::<Vec<String>>()
                     .contains(scrape_name)
         })
-        .copied()
-        .collect::<Vec<&str>>();
+        .cloned()
+        .map(|l| l.to_owned())
+        .collect::<Vec<String>>();
 }
 
 pub fn get_all_scrape_names() -> Vec<String> {
-    let file_content = include_str!("../scrapes.txt");
+    // let file: File;
+    // let file_result = OpenOptions::new().read(true).open("scrapes.txt");
 
-    let lines: Vec<&str> = file_content.trim().split('\n').collect();
+    // match file_result {
+    //     Ok(file_ok) => file = file_ok,
+    //     Err(err) => {
+    //         panic!("The file could not be opened. Error: {}", err);
+    //     }
+    // }
+
+    // let buff_reader = BufReader::new(&file);
+
+    // let mut lines: Vec<&str> = Vec::new();
+    // for line in buff_reader.lines() {
+    //     match line {
+    //         Ok(l) => lines.push(&l),
+    //         Err(e) => println!("ERROR: {}", e),
+    //     }
+    // }
+
+    //let file_content = include_str!("../scrapes.txt");
+
+    //let lines: Vec<&str> = file_content.trim().split('\n').collect();
+
+    let lines = get_file_lines();
+
     let saved_scrapes: Vec<&str> = lines.iter().map(|l| l.trim()).collect();
 
     let mut scrape_names: Vec<String> = Vec::new();
@@ -101,12 +150,15 @@ pub fn get_all_scrape_names() -> Vec<String> {
 // }
 
 pub fn get_saved_scrape(name: &str) -> Option<Vec<Scrape>> {
-    let file_content = include_str!("../scrapes.txt");
+    //let file_content = include_str!("../scrapes.txt");
 
-    let lines: Vec<&str> = file_content.trim().split('\n').collect();
+    //let lines: Vec<&str> = file_content.trim().split('\n').collect();
+
+    let lines = get_file_lines();
+
     let saved_scrape = lines
         .iter()
-        .find(|&&s| {
+        .find(|&s| {
             let line_parts = s.split(';').collect::<Vec<&str>>();
             if line_parts[0] == "combined" {
                 line_parts[1] == name
@@ -114,7 +166,8 @@ pub fn get_saved_scrape(name: &str) -> Option<Vec<Scrape>> {
                 line_parts[0] == name
             }
         })
-        .copied();
+        .map(|l| l)
+        .cloned();
 
     if let Some(scrape) = saved_scrape {
         let mut scrapes: Vec<Scrape> = Vec::new();
@@ -129,15 +182,15 @@ pub fn get_saved_scrape(name: &str) -> Option<Vec<Scrape>> {
             for sc in scrapes_in_combined {
                 let saved_scrape = lines
                     .iter()
-                    .find(|&&s| s.split(';').collect::<Vec<&str>>()[0] == sc)
-                    .copied();
+                    .find(|&s| s.split(';').collect::<Vec<&str>>()[0] == sc)
+                    .cloned();
 
                 if let Some(s) = saved_scrape {
-                    scrapes.push(get_scrape_from_str(s));
+                    scrapes.push(get_scrape_from_str(&s));
                 }
             }
         } else {
-            scrapes.push(get_scrape_from_str(scrape));
+            scrapes.push(get_scrape_from_str(&scrape));
         }
 
         Some(scrapes)
@@ -237,4 +290,29 @@ fn get_scrape_from_str(data_str: &str) -> Scrape {
         presentation,
         export,
     }
+}
+
+fn get_file_lines() -> Vec<String> {
+    let file: File;
+    let file_result = OpenOptions::new().read(true).open("scrapes.txt");
+
+    match file_result {
+        Ok(file_ok) => file = file_ok,
+        Err(_err) => {
+            println!("There are no saved scrapes");
+            return Vec::new();
+        }
+    }
+
+    let buff_reader = BufReader::new(&file);
+
+    let mut lines: Vec<String> = Vec::new();
+    for line in buff_reader.lines() {
+        match line {
+            Ok(l) => lines.push(l),
+            Err(e) => println!("ERROR: {}", e),
+        }
+    }
+
+    lines
 }
