@@ -10,7 +10,7 @@ pub fn combine(name: String, scrapes: Vec<String>) {
 
     match file_result {
         Ok(file_ok) => file = file_ok,
-        Err(err) => {
+        Err(_err) => {
             println!("There are no saved scrapes");
             return;
         }
