@@ -79,7 +79,6 @@ pub fn get_saved_scrape(name: &str) -> Option<Vec<Scrape>> {
                 line_parts[0] == name
             }
         })
-        .map(|l| l)
         .cloned();
 
     if let Some(scrape) = saved_scrape {

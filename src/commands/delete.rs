@@ -9,7 +9,7 @@ use crate::utils::{get_combined_scrapes_for_scrape, get_scrape_name};
 
 pub fn delete(name: String) {
     let file: File;
-    let file_result = OpenOptions::new().read(true).open("/.data/scrapes.txt");
+    let file_result = OpenOptions::new().read(true).open(".data/scrapes.txt");
 
     match file_result {
         Ok(file_ok) => file = file_ok,
@@ -90,14 +90,16 @@ pub fn delete(name: String) {
         lines_to_write.push(line);
     }
 
-    let file_result = File::create("/.data/scrapes.txt.temp");
+    let file_result = File::create(".data/scrapes.txt.temp");
     if let Err(err) = file_result {
         println!("Something went wrong. Error: {}", err);
         return;
     }
 
     let mut out_file: File;
-    let out_file_result = OpenOptions::new().write(true).open("/.data/scrapes.txt.temp");
+    let out_file_result = OpenOptions::new()
+        .write(true)
+        .open(".data/scrapes.txt.temp");
 
     match out_file_result {
         Ok(file) => out_file = file,
@@ -118,7 +120,7 @@ pub fn delete(name: String) {
     drop(file);
     drop(out_file);
 
-    let rename_result = fs::rename("/.data/scrapes.txt.temp", "/.data/scrapes.txt");
+    let rename_result = fs::rename(".data/scrapes.txt.temp", ".data/scrapes.txt");
     if let Err(err) = rename_result {
         println!("Something went wrong. Error: {}", err);
         return;

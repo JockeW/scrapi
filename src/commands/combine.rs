@@ -4,15 +4,14 @@ use std::io::{BufRead, BufReader, Write};
 pub fn combine(name: String, scrapes: Vec<String>) {
     let mut file: File;
     let file_result = OpenOptions::new()
-        .create(true)
         .append(true)
         .read(true)
-        .open("/.data/scrapes.txt");
+        .open(".data/scrapes.txt");
 
     match file_result {
         Ok(file_ok) => file = file_ok,
         Err(err) => {
-            println!("Something went wrong when opening file. Error: {}", err);
+            println!("There are no saved scrapes");
             return;
         }
     }
