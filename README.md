@@ -7,7 +7,7 @@ Use css selectors and html attributes to get the data you want. The 'scrapes' ca
 ## Install
 
 ```bash
-cargo run-script install
+cargo install scrapi
 ```
 
 ## Commands
