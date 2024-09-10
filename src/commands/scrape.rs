@@ -415,7 +415,7 @@ fn save_scrape(
         .create(true)
         .append(true)
         .read(true)
-        .open("/.data/scrapes.txt");
+        .open(".data/scrapes.txt");
 
     match file_result {
         Ok(file_ok) => file = file_ok,

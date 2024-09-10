@@ -207,12 +207,11 @@ fn get_scrape_from_str(data_str: &str) -> Scrape {
 
 fn get_file_lines() -> Vec<String> {
     let file: File;
-    let file_result = OpenOptions::new().read(true).open("/.data/scrapes.txt");
+    let file_result = OpenOptions::new().read(true).open(".data/scrapes.txt");
 
     match file_result {
         Ok(file_ok) => file = file_ok,
         Err(_err) => {
-            println!("The scrapes file does not exist. {}", _err);
             return Vec::new();
         }
     }
