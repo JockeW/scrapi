@@ -15,7 +15,6 @@ exclude = ["/.github"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-scrapi-core = { path = "../scrapi-core" }
 clap = { version = "4.2.7", features = ["derive"] }
 cli-table = "0.4.7"
 colored = "2.0.0"

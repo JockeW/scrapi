@@ -13,8 +13,6 @@ use serde_json::{json, to_writer};
 
 use crate::{enums::Presentation, utils::get_all_scrape_names};
 
-use scrapi_core::check_scrape;
-
 #[allow(clippy::too_many_arguments)]
 pub fn scrape(
     url: String,
